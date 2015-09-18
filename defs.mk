@@ -1,39 +1,36 @@
-#include ../pipeline_msca/config.mk
-include ../pipeline/config.mk
+include config.mk
 
 # base directory definitions
-MSCA_PROJ_DIR = /hive/groups/recon/projs/mus_strain_cactus
-MSCA_DATA_DIR = ${MSCA_PROJ_DIR}/pipeline_data
-MSCA_ASSMEBLIES_DIR = ${MSCA_DATA_DIR}/assemblies/${MSCA_VERSION}
-HAL_BIN_DIR = ${MSCA_PROJ_DIR}/src/progressiveCactus/submodules/hal/bin
-PYCBIO_DIR = ${MSCA_PROJ_DIR}/src/pycbio
+GORILLA_PROJ_DIR = /hive/groups/recon/projs/gorilla_eichler
+GORILLA_DATA_DIR = ${GORILLA_PROJ_DIR}/pipeline_data
+GORILLA_ASSMEBLIES_DIR = ${GORILLA_DATA_DIR}/assemblies/${GORILLA_VERSION}
+HAL_BIN_DIR = ${GORILLA_PROJ_DIR}/src/progressiveCactus/submodules/hal/bin
+PYCBIO_DIR = ${GORILLA_PROJ_DIR}/src/pycbio
 
-TRANS_MAP_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/transMap/${TRANS_MAP_VERSION}
-TMR_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/augustus/tmr
+TRANS_MAP_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/transMap/${TRANS_MAP_VERSION}
 SRC_GENCODE_DATA_DIR = ${TRANS_MAP_DIR}/data
-ASM_GENOMES_DIR = ${MSCA_DATA_DIR}/assemblies/${MSCA_VERSION}
-CHAIN_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/chains
-ANNOTATION_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/comparativeAnnotation/${COMPARATIVE_ANNOTATOR_VERSION}
-
-DONE_FLAG_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/completion_flags
+ASM_GENOMES_DIR = ${GORILLA_DATA_DIR}/assemblies/${GORILLA_VERSION}
+CHAIN_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/chains
+ANNOTATION_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/comparativeAnnotation/${COMPARATIVE_ANNOTATOR_VERSION}
 
 ###
 # genome and organisms.  The term `org' indicated the abbreviation for the organism,
-# the term `orgDb' refers to the browser database name, in the form Mus${org}_${MSCA_VERSION}
+# the term `orgDb' refers to the browser database name, in the form Mus${org}_${GORILLA_VERSION}
 ###
 allOrgs = ${srcOrg} ${mappedOrgs}
 
 # this is function to generate the orgDb name from an org, use it with:
 #    $(call orgToOrgDbFunc,${yourOrg})
-orgToOrgDbFunc = Mus${1}_${MSCA_VERSION}
+orgToOrgDbFunc = ${1}_${GORILLA_VERSION}
 
 # HAL file with simple and browser database names (e.g. Mus_XXX_1411)
-halFile = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/cactus/${MSCA_VERSION}.hal
-halBrowserFile = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/cactus/${MSCA_VERSION}_browser.hal
+halFile = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}.hal
+halBrowserFile = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}_browser.hal
 
 # LODs (based off the halBrowserFile)
-lodTxtFile = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/cactus/${MSCA_VERSION}_lod.txt
-lodDir = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/cactus/${MSCA_VERSION}_lods
+lodTxtFile = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}_lod.txt
+lodDir = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}_lods
+
 
 ###
 # GENCODE gene sets
@@ -44,7 +41,7 @@ gencodeBasic = GencodeBasic${GENCODE_VERSION}
 gencodeComp = GencodeComp${GENCODE_VERSION}
 gencodePseudo = GencodePseudoGene${GENCODE_VERSION}
 gencodeAttrs = GencodeAttrs${GENCODE_VERSION}
-gencodeSubsets = ${gencodeComp} #${gencodeBasic} ${gencodePseudo}
+gencodeSubsets = ${gencodeBasic} ${gencodeComp} ${gencodePseudo}
 
 # GENCODE src annotations based on hgDb databases above
 srcGencodeBasic = wgEncode${gencodeBasic}
@@ -63,13 +60,18 @@ srcGencodeAllBed = ${srcGencodeSubsets:%=${SRC_GENCODE_DATA_DIR}/%.bed}
 # transmap
 ###
 
+# chaining methods used by transmap
+transMapChainingMethods = simpleChain all syn
+
+# call function to get transmap directory given org and chain method
+transMapDataDirFunc = ${TRANS_MAP_DIR}/transMap/${1}/${2}
+
 # hgDb tables used in transMap/comparativeAnnotator
 transMapGencodeBasic = transMap${gencodeBasic}
 transMapGencodeComp = transMap${gencodeComp}
 transMapGencodePseudo = transMap${gencodePseudo}
 transMapGencodeAttrs = transMap${gencodeAttrs}
-transMapGencodeSubsets = ${transMapGencodeComp} #${transMapGencodeBasic} ${transMapGencodePseudo}
-
+transMapGencodeSubsets = ${transMapGencodeBasic} ${transMapGencodeComp} ${transMapGencodePseudo}
 
 ##
 # Sequence files
@@ -92,24 +94,23 @@ queryTwoBit = $(call asmTwoBitFunc,${srcOrg})
 queryChromSizes = $(call asmChromSizesFunc,${srcOrg})
 
 
-##
-# AugustusTMR
-# at this point is only run on one gencode subset to avoid wasted computation
-##
-augustusGencodeSet = ${gencodeComp}
-AUGUSTUS_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/augustus
-AUGUSTUS_TMR_DIR = ${AUGUSTUS_DIR}/tmr
-AUGUSTUS_WORK_DIR = ${AUGUSTUS_DIR}/work
-
-
 # comparative anotations types produced
-compAnnTypes = allClassifiers allAugustusClassifiers potentiallyInterestingBiology assemblyErrors alignmentErrors \
-		 transMapOk augustusOk AugustusTMR
+compAnnTypes = alignmentErrors allProblems assemblyErrors comparativeAnnotation inFrameStop interestingBiology
 
 ###
 # chaining
 ###
-CHAINING_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/chaining/${CHAINING_VERSION}
+CHAINING_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/chaining/${CHAINING_VERSION}
+
+# call function to  to obtain path to chain/net files, given type,srcOrg,targetOrg.
+chainFunc = ${CHAINING_DIR}/${2}-${3}.${1}.chain.gz
+netFunc = ${CHAINING_DIR}/${2}-${3}.${1}.net.gz
+
+# call functions to obtain path to chain/net files, given srcOrg,targetOrg.
+chainAllFunc = $(call chainFunc,all,${1},${2})
+netAllFunc = $(call netFunc,all,${1},${2})
+chainSynFunc = $(call chainFunc,syn,${1},${2})
+netSynFunc = $(call netFunc,syn,${1},${2})
 
 ###
 # parasol
@@ -127,10 +128,9 @@ tmpExt = ${host}.${ppid}.tmp
 SHELL = /bin/bash -beEu
 export SHELLOPTS := pipefail
 PYTHON_BIN = /hive/groups/recon/local/bin
-AUGUSTUS_BIN_DIR = /cluster/home/mario/augustus/trunks/bin
 
 python = ${PYTHON_BIN}/python
-export PATH := ${PYTHON_BIN}:${PYCBIO_DIR}/bin:./bin:${HAL_BIN_DIR}:${AUGUSTUS_BIN_DIR}:${PATH}
+export PATH := ${PYTHON_BIN}:${PYCBIO_DIR}/bin:./bin:${HAL_BIN_DIR}:${PATH}
 export PYTHONPATH := ./:${PYTHONPATH}
 
 ifneq (${HOSTNAME},hgwdev)
@@ -155,12 +155,4 @@ KENT_HG_LIB_DIR = ${KENT_DIR}/src/hg/lib
 
 # root directory for jobtree jobs.  Subdirectories should
 # be create for each task
-jobTreeRootTmpDir = jobTree.tmp/${MSCA_VERSION}
-
-# jobTree configuration
-batchSystem = parasol
-maxThreads = 20
-defaultMemory = 8589934592
-maxJobDuration = 28800
-jobTreeOpts = --defaultMemory ${defaultMemory} --batchSystem ${batchSystem} --parasolCommand $(shell pwd)/bin/remparasol \
-              --maxJobDuration ${maxJobDuration} --maxThreads ${maxThreads} --stats
+jobTreeRootTmpDir = jobTree.tmp/${GORILLA_VERSION}
