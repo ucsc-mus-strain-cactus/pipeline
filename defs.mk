@@ -1,35 +1,35 @@
-include ../pipeline/config.mk
+include config.mk
 
 # base directory definitions
-MSCA_PROJ_DIR = /hive/groups/recon/projs/mus_strain_cactus
-MSCA_DATA_DIR = ${MSCA_PROJ_DIR}/pipeline_data
-MSCA_ASSMEBLIES_DIR = ${MSCA_DATA_DIR}/assemblies/${MSCA_VERSION}
-HAL_BIN_DIR = ${MSCA_PROJ_DIR}/src/progressiveCactus/submodules/hal/bin
-PYCBIO_DIR = ${MSCA_PROJ_DIR}/src/pycbio
+GORILLA_PROJ_DIR = /hive/groups/recon/projs/gorilla_eichler
+GORILLA_DATA_DIR = ${GORILLA_PROJ_DIR}/pipeline_data
+GORILLA_ASSMEBLIES_DIR = ${GORILLA_DATA_DIR}/assemblies/${GORILLA_VERSION}
+HAL_BIN_DIR = ${GORILLA_PROJ_DIR}/src/progressiveCactus/submodules/hal/bin
+PYCBIO_DIR = ${GORILLA_PROJ_DIR}/src/pycbio
 
-TRANS_MAP_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/transMap/${TRANS_MAP_VERSION}
+TRANS_MAP_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/transMap/${TRANS_MAP_VERSION}
 SRC_GENCODE_DATA_DIR = ${TRANS_MAP_DIR}/data
-ASM_GENOMES_DIR = ${MSCA_DATA_DIR}/assemblies/${MSCA_VERSION}
-CHAIN_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/chains
-ANNOTATION_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/comparativeAnnotation/${COMPARATIVE_ANNOTATOR_VERSION}
+ASM_GENOMES_DIR = ${GORILLA_DATA_DIR}/assemblies/${GORILLA_VERSION}
+CHAIN_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/chains
+ANNOTATION_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/comparativeAnnotation/${COMPARATIVE_ANNOTATOR_VERSION}
 
 ###
 # genome and organisms.  The term `org' indicated the abbreviation for the organism,
-# the term `orgDb' refers to the browser database name, in the form Mus${org}_${MSCA_VERSION}
+# the term `orgDb' refers to the browser database name, in the form Mus${org}_${GORILLA_VERSION}
 ###
 allOrgs = ${srcOrg} ${mappedOrgs}
 
 # this is function to generate the orgDb name from an org, use it with:
 #    $(call orgToOrgDbFunc,${yourOrg})
-orgToOrgDbFunc = Mus${1}_${MSCA_VERSION}
+orgToOrgDbFunc = ${1}_${GORILLA_VERSION}
 
 # HAL file with simple and browser database names (e.g. Mus_XXX_1411)
-halFile = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/cactus/${MSCA_VERSION}.hal
-halBrowserFile = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/cactus/${MSCA_VERSION}_browser.hal
+halFile = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}.hal
+halBrowserFile = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}_browser.hal
 
 # LODs (based off the halBrowserFile)
-lodTxtFile = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/cactus/${MSCA_VERSION}_lod.txt
-lodDir = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/cactus/${MSCA_VERSION}_lods
+lodTxtFile = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}_lod.txt
+lodDir = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}_lods
 
 
 ###
@@ -100,7 +100,7 @@ compAnnTypes = alignmentErrors allProblems assemblyErrors comparativeAnnotation 
 ###
 # chaining
 ###
-CHAINING_DIR = ${MSCA_DATA_DIR}/comparative/${MSCA_VERSION}/chaining/${CHAINING_VERSION}
+CHAINING_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/chaining/${CHAINING_VERSION}
 
 # call function to  to obtain path to chain/net files, given type,srcOrg,targetOrg.
 chainFunc = ${CHAINING_DIR}/${2}-${3}.${1}.chain.gz
@@ -155,4 +155,4 @@ KENT_HG_LIB_DIR = ${KENT_DIR}/src/hg/lib
 
 # root directory for jobtree jobs.  Subdirectories should
 # be create for each task
-jobTreeRootTmpDir = jobTree.tmp/${MSCA_VERSION}
+jobTreeRootTmpDir = jobTree.tmp/${GORILLA_VERSION}

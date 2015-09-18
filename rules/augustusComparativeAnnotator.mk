@@ -20,8 +20,8 @@ targetChromSizes = ${augustusOrgs:%=$(call asmChromSizesFunc,%)}
 queryFasta = $(call asmFastaFunc,${srcOrg})
 
 comparativeAnnotationDir = ${ANNOTATION_DIR}_Augustus
-transMapChainedAllPsls = ${augustusOrgs:%=${TRANS_MAP_DIR}/transMap/%/transMap${gencodeComp}.psl}
-transMapEvalAllGp = ${augustusOrgs:%=${TRANS_MAP_DIR}/transMap/%/transMap${gencodeComp}.gp}
+transMapChainedAllPsls = ${augustusOrgs:%=${TRANS_MAP_DIR}/transMap/%/simpleChain/transMap${gencodeComp}.psl}
+transMapEvalAllGp = ${augustusOrgs:%=${TRANS_MAP_DIR}/transMap/%/simpleChain/transMap${gencodeComp}.gp}
 augGps = ${augustusOrgs:%=${TMR_DIR}/%.gp}
 compGp = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeComp}.gp
 basicGp = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeBasic}.gp
