@@ -26,7 +26,7 @@ ${srcGencodeAttrsTsv}:
 
 ${SRC_GENCODE_DATA_DIR}/%.gp:
 	@mkdir -p $(dir $@)
-	hgsql -Ne 'select * from $*' ${srcOrgHgDb} | cut -f 2- | tawk -v chromCol=2 '${editUcscChrom}' > $@.${tmpExt}
+	hgsql -Ne 'select * from $*' ${srcOrgHgDb} | cut -f 2-  > $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
 ${srcGencodeDataDir}/%.bed: ${srcGencodeDataDir}/%.gp
@@ -49,7 +49,7 @@ ${SRC_GENCODE_DATA_DIR}/%.cds: ${SRC_GENCODE_DATA_DIR}/%.psl
 	touch $@
 ${SRC_GENCODE_DATA_DIR}/%.psl:
 	@mkdir -p $(dir $@)
-	genePredToFakePsl ${srcOrgHgDb} $* stdout ${SRC_GENCODE_DATA_DIR}/$*.cds | tawk -v chromCol=14 '${editUcscChrom}' >$@.${tmpExt}
+	genePredToFakePsl ${srcOrgHgDb} $* stdout ${SRC_GENCODE_DATA_DIR}/$*.cds > $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
 ${queryFasta}:
@@ -67,5 +67,3 @@ ${queryChromSizes}: ${queryTwoBit}
 	@mkdir -p $(dir $@)
 	twoBitInfo ${queryTwoBit} stdout | sort -k2rn > $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
-
-
