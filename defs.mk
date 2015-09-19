@@ -61,7 +61,8 @@ srcGencodeAllBed = ${srcGencodeSubsets:%=${SRC_GENCODE_DATA_DIR}/%.bed}
 ###
 
 # chaining methods used by transmap
-transMapChainingMethods = simpleChain all syn
+transMapChainingMethods =  all syn
+# FIXME: removed simpleChain until fixed
 
 # call function to get transmap directory given org and chain method
 transMapDataDirFunc = ${TRANS_MAP_DIR}/transMap/${1}/${2}
