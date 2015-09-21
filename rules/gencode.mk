@@ -13,6 +13,8 @@ all: ${srcGencodeAttrsTsv} ${srcGencodeAllGp} ${srcGencodeAllBed} ${srcGencodeAl
 # FIXME: this is also build_browser/bin/ucscToEnsemblChrom
 # FIXME: this can be build using assembly summary tables
 editUcscChrom = $$chromCol=="chrM"{$$chromCol="MT"} {$$chromCol = gensub("_random$$","", "g", $$chromCol);$$chromCol = gensub("^chr.*_([0-9A-Za-z]+)$$","\\1.1", "g", $$chromCol);  gsub("^chr","",$$chromCol); print $$0}
+filterChrY = {if ($$chromCol != "chrY") print $0}
+
 
 ${srcGencodeAttrsTsv}:
 	@mkdir -p $(dir $@)
@@ -21,7 +23,7 @@ ${srcGencodeAttrsTsv}:
 
 ${SRC_GENCODE_DATA_DIR}/%.gp:
 	@mkdir -p $(dir $@)
-	hgsql -Ne 'select * from $*' ${srcOrgHgDb} | cut -f 2-  > $@.${tmpExt}
+	hgsql -Ne 'select * from $*' ${srcOrgHgDb} | cut -f 2- | tawk -v chromCol=2 '${filterChrY}'> $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
 ${srcGencodeDataDir}/%.bed: ${srcGencodeDataDir}/%.gp
@@ -40,7 +42,7 @@ ${SRC_GENCODE_DATA_DIR}/%.cds: ${SRC_GENCODE_DATA_DIR}/%.psl
 	touch $@
 ${SRC_GENCODE_DATA_DIR}/%.psl:
 	@mkdir -p $(dir $@)
-	genePredToFakePsl ${srcOrgHgDb} $* stdout ${SRC_GENCODE_DATA_DIR}/$*.cds > $@.${tmpExt}
+	genePredToFakePsl ${srcOrgHgDb} $* stdout ${SRC_GENCODE_DATA_DIR}/$*.cds | tawk -v chromCol=14 '${filterChrY}' > $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
 ${queryFasta}:
