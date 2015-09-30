@@ -19,75 +19,66 @@ targetFastaFiles = ${augustusOrgs:%=$(call asmFastaFunc,%)}
 targetChromSizes = ${augustusOrgs:%=$(call asmChromSizesFunc,%)}
 queryFasta = $(call asmFastaFunc,${srcOrg})
 
+
 comparativeAnnotationDir = ${ANNOTATION_DIR}_Augustus
-transMapChainedAllPsls = ${augustusOrgs:%=${TRANS_MAP_DIR}/transMap/%/simpleChain/transMap${gencodeComp}.psl}
-transMapEvalAllGp = ${augustusOrgs:%=${TRANS_MAP_DIR}/transMap/%/simpleChain/transMap${gencodeComp}.gp}
-augGps = ${augustusOrgs:%=${TMR_DIR}/%.gp}
+transMapChainedAllPsls = ${augustusOrgs:%=${TRANS_MAP_DIR}/transMap/%/${augChaining}/transMap${gencodeComp}.psl}
+transMapEvalAllGp = ${augustusOrgs:%=${TRANS_MAP_DIR}/transMap/%/${augChaining}/transMap${gencodeComp}.gp}
 compGp = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeComp}.gp
 basicGp = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeBasic}.gp
 srcFa = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeComp}.fa
-TMR_DIR = /cluster/home/ifiddes/mus_strain_data/pipeline_data/comparative/1504/augustus/tmr
 augustusGps = ${augustusOrgs:%=${TMR_DIR}/%.gp}
-comparativeJobTreeDir = $(shell pwd)/.Augustus_${gencodeComp}_${MSCA_VERSION}_comparativeAnnotatorJobTree
-alignJobTreeDir = $(shell pwd)/.consensusAlignJobTree
-alignLog = $(shell pwd)/augustusAlign.log
-log = $(shell pwd)/Augustus_${gencodeComp}_${MSCA_VERSION}_jobTree.log
 consensusDir = ${comparativeAnnotationDir}/consensus
 augustusStatsDir = ${comparativeAnnotationDir}/augustus_stats
 augustusBeds = ${augustusOrgs:%=${augustusStatsDir}/%.bed}
 augustusFastas = ${augustusOrgs:%=${augustusStatsDir}/%.fa}
 augustusFaidx = ${augustusOrgs:%=${augustusStatsDir}/%.fa.fai}
-METRICS_DIR = ${comparativeAnnotationDir}/metrics
-clustLog = $(shell pwd)/${gencodeComp}_${MSCA_VERSION}_clustering.log
-clusteringJobTree = $(shell pwd)/.${gencodeComp}_${MSCA_VERSION}_clusteringJobTree
+metricsDir = ${comparativeAnnotationDir}/metrics
 
-all: ${comparativeAnnotationDir}/DONE ${METRICS_DIR}/DONE ${METRICS_DIR}/CLUSTERING_DONE consensus
+
+jobTreeCompAnnTmpDir = $(shell pwd)/${jobTreeRootTmpDir}/augustusComparativeAnnotator/${gencodeComp}_${augChaining}
+jobTreeCompAnnJobOutput = ${jobTreeCompAnnTmpDir}/comparativeAnnotator.out
+jobTreeCompAnnJobDir = ${jobTreeCompAnnTmpDir}/jobTree
+
+jobTreeClusteringTmpDir = $(shell pwd)/${jobTreeRootTmpDir}/clustering/${gencodeComp}_${augChaining}
+jobTreeClusteringJobOutput = ${jobTreeClusteringTmpDir}/clustering.out
+jobTreeClusteringJobDir = ${jobTreeClusteringTmpDir}/jobTree
+
+jobTreeAlignTmpDir = $(shell pwd)/${jobTreeRootTmpDir}/alignAugustus/${gencodeComp}_${augChaining}
+jobTreeAlignJobOutput = ${jobTreeAlignTmpDir}/alignAugustus.out
+jobTreeAlignJobDir = ${jobTreeAlignTmpDir}/jobTree
+
+jobTreeOpts = --defaultMemory=${defaultMemory} --stats --batchSystem=parasol --parasolCommand=$(shell pwd)/bin/remparasol --maxJobDuration ${maxJobDuration}
+
+
+all: ${comparativeAnnotationDir}/DONE ${metricsDir}/DONE ${metricsDir}/CLUSTERING_DONE consensus
 
 ${comparativeAnnotationDir}/DONE: ${compGp} ${transMapChainedAllPsls} ${transMapEvalAllGp} ${augustusGps}
 	@mkdir -p $(dir $@)
-	rm -rf ${comparativeJobTreeDir}
-	if [ "${batchSystem}" = "parasol" ]; then \
-		cwd="$(shell pwd)" ;\
-		ssh ku -Tnx "cd $$cwd && cd ../comparativeAnnotator && export PYTHONPATH=./ && \
-		export PATH=./bin/:./sonLib/bin:./jobTree/bin:${PATH} && \
-		${python} src/annotationPipelineWithAugustus.py --refGenome ${srcOrg} --genomes ${augustusOrgs} --sizes ${targetChromSizes} \
-		--psls ${transMapChainedAllPsls} --gps ${transMapEvalAllGp} --fastas ${targetFastaFiles} --refFasta ${queryFasta} \
-		--annotationGp ${compGp} --batchSystem ${batchSystem} --gencodeAttributeMap ${srcGencodeAttrsTsv} \
-		--defaultMemory ${defaultMemory} --jobTree ${comparativeJobTreeDir} --maxJobDuration ${maxJobDuration} \
-		--maxThreads ${maxThreads} --stats --outDir ${comparativeAnnotationDir} --augustusGps ${augustusGps} &> ${log}" ;\
-	else \
-		${python} ../comparativeAnnotator/src/annotationPipelineWithAugustus.py --refGenome ${srcOrg} --genomes ${augustusOrgs} --sizes ${targetChromSizes} \
-		--psls ${transMapChainedAllPsls} --gps ${transMapEvalAllGp} --fastas ${targetFastaFiles} --refFasta ${queryFasta} \
-		--annotationGp ${compGp} --batchSystem ${batchSystem} --gencodeAttributeMap ${srcGencodeAttrsTsv} \
-		--defaultMemory ${defaultMemory} --jobTree ${comparativeJobTreeDir} --maxJobDuration ${maxJobDuration} \
-		--maxThreads ${maxThreads} --stats --outDir ${comparativeAnnotationDir} --augustusGps ${augustusGps} &> ${log} ;\
-	fi
+	@mkdir -p ${jobTreeCompAnnTmpDir}
+	if [ -d ${jobTreeCompAnnJobDir} ]; then rm -rf ${jobTreeCompAnnJobDir}; fi
+	cd ../comparativeAnnotator && ${python} src/annotationPipelineWithAugustus.py ${jobTreeOpts} \
+	--refGenome ${srcOrg} --genomes ${augustusOrgs} --sizes ${targetChromSizes} --augustusGps ${augustusGps} \
+	--psls ${transMapChainedAllPsls} --gps ${transMapEvalAllGp} --fastas ${targetFastaFiles} --refFasta ${queryFasta} \
+	--annotationGp ${compGp} --gencodeAttributeMap ${srcGencodeAttrsTsv} --jobTree ${jobTreeCompAnnJobDir} \
+	--outDir ${comparativeAnnotationDir} &> ${jobTreeCompAnnJobOutput}
 	touch $@
 
-${METRICS_DIR}/DONE: ${comparativeAnnotationDir}/DONE
+${metricsDir}/DONE: ${comparativeAnnotationDir}/DONE
 	@mkdir -p $(dir $@)
-	cd ../comparativeAnnotator ;\
-	${python} scripts/coverage_identity_ok_plots.py --outDir ${METRICS_DIR} --genomes ${augustusOrgs} \
-	--comparativeAnnotationDir ${comparativeAnnotationDir} --attributePath ${srcGencodeAttrsTsv} \
-	--annotationGp ${compGp} --gencode ${gencodeComp}
+	cd ../comparativeAnnotator && ${python} scripts/coverage_identity_ok_plots.py \
+	--outDir ${metricsDir} --genomes ${augustusOrgs} --annotationGp ${compGp} --gencode ${gencodeComp} \
+	--comparativeAnnotationDir ${comparativeAnnotationDir} --attributePath ${srcGencodeAttrsTsv}
 	touch $@
 
-${METRICS_DIR}/CLUSTERING_DONE: ${comparativeAnnotationDir}/DONE
+${metricsDir}/CLUSTERING_DONE: ${comparativeAnnotationDir}/DONE
 	@mkdir -p $(dir $@)
-	rm -rf ${clusteringJobTree}
-	cd ../comparativeAnnotator ;\
-	if [ "${batchSystem}" = "parasol" ]; then \
-		cwd="$(shell pwd)" ;\
-		ssh ku -Tnx "cd $$cwd && cd ../comparativeAnnotator && export PYTHONPATH=./ && \
-		export PATH=./bin/:./sonLib/bin:./jobTree/bin:${PATH} && \
-		${python} scripts/clustering.py --outDir ${METRICS_DIR} --genomes ${augustusOrgs} \
-		--comparativeAnnotationDir ${comparativeAnnotationDir} --attributePath ${srcGencodeAttrsTsv} --batchSystem parasol \
-		--annotationGp ${compGp} --gencode ${gencodeComp} --jobTree ${clusteringJobTree} --maxCpus ${maxCpus} &> ${clustLog}" ;\
-	else \
-		cd ../comparativeAnnotator && ${python} scripts/clustering.py --outDir ${METRICS_DIR} --genomes ${augustusOrgs} \
-		--comparativeAnnotationDir ${comparativeAnnotationDir} --attributePath ${srcGencodeAttrsTsv} --batchSystem singleMachine \
-		--annotationGp ${compGp} --gencode ${gencodeComp} --jobTree ${clusteringJobTree} --maxThreads ${maxThreads} &> ${clustLog} ;\
-	fi
+	@mkdir -p ${jobTreeClusteringTmpDir}
+	if [ -d ${jobTreeClusteringJobDir} ]; then rm -rf ${jobTreeClusteringJobDir}; fi
+	cd ../comparativeAnnotator && ${python} scripts/clustering.py ${jobTreeOpts} \
+	--outDir ${metricsDir} --comparativeAnnotationDir ${comparativeAnnotationDir} \
+	--attributePath ${srcGencodeAttrsTsv} \
+	--annotationGp ${compGp} --gencode ${gencodeComp} --genomes ${augustusOrgs} \
+	--jobTree ${jobTreeClusteringJobDir} &> ${jobTreeClusteringJobOutput}
 	touch $@
 	
 
@@ -112,20 +103,11 @@ alignTranscripts: ${augustusStatsDir}/DONE
 
 ${augustusStatsDir}/DONE: ${augustusBeds} ${augustusFastas} ${augustusFaidx}
 	@mkdir -p $(dir $@)
-	rm -rf ${alignJobTreeDir}
-	if [ "${batchSystem}" = "parasol" ]; then \
-		cwd="$(shell pwd)" ;\
-		ssh ku -Tnx "cd $$cwd && cd ../comparativeAnnotator && export PYTHONPATH=./ && \
-		export PATH=./bin/:./sonLib/bin:./jobTree/bin:${PATH} && \
-		${python} scripts/alignAugustus.py --jobTree ${alignJobTreeDir} --batchSystem ${batchSystem} \
-		--maxCpus ${maxCpus} --defaultMemory ${defaultMemory} --genomes ${augustusOrgs} --refFasta ${srcFa} \
-		--outDir ${augustusStatsDir} --augustusStatsDir ${augustusStatsDir} &> ${alignLog}" ;\
-	else \
-		${python} scripts/alignAugustus.py --jobTree ${alignJobTreeDir} --batchSystem ${batchSystem} \
-		--maxThreads ${maxThreads} --defaultMemory ${defaultMemory} --genomes ${augustusOrgs} --refFasta ${srcFa} \
-		--outDir ${augustusStatsDir} --augustusStatsDir ${augustusStatsDir}  &> ${alignLog} ;\
-	fi
-	touch $@
+	@mkdir -p ${jobTreeAlignTmpDir}
+	if [ -d ${jobTreeAlignJobDir} ]; then rm -rf ${jobTreeAlignJobDir}; fi
+	cd ../comparativeAnnotator && ${python} scripts/alignAugustus.py ${jobTreeOpts} \
+	--jobTree ${jobTreeAlignJobDir} --genomes ${augustusOrgs} --refFasta ${srcFa} \
+	--outDir ${augustusStatsDir} --augustusStatsDir ${augustusStatsDir} &> ${jobTreeAlignJobOutput}
 
 makeConsensus: ${consensusDir}/DONE
 
@@ -133,6 +115,6 @@ ${consensusDir}/DONE: ${augustusStatsDir}/DONE
 	@mkdir -p $(dir $@)
 	cd ../comparativeAnnotator && ${python} scripts/consensus.py --genomes ${augustusOrgs} \
 	--compAnnPath ${comparativeAnnotationDir} --statsDir ${augustusStatsDir} --outDir ${consensusDir} \
-	--attributePath ${srcGencodeAttrsTsv} --augGps ${augGps} --tmGps ${transMapEvalAllGp} --compGp ${compGp} \
+	--attributePath ${srcGencodeAttrsTsv} --augGps ${augustusGps} --tmGps ${transMapEvalAllGp} --compGp ${compGp} \
 	--basicGp ${basicGp}
 	touch $@
