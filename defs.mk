@@ -1,4 +1,4 @@
-include config.mk
+include ../pipeline/config.mk
 
 # base directory definitions
 GORILLA_PROJ_DIR = /hive/groups/recon/projs/gorilla_eichler
@@ -156,3 +156,11 @@ KENT_HG_LIB_DIR = ${KENT_DIR}/src/hg/lib
 # root directory for jobtree jobs.  Subdirectories should
 # be create for each task
 jobTreeRootTmpDir = jobTree.tmp/${GORILLA_VERSION}
+
+# jobTree configuration
+batchSystem = parasol
+maxThreads = 20
+defaultMemory = 8589934592
+maxJobDuration = 28800
+jobTreeOpts = --defaultMemory ${defaultMemory} --batchSystem ${batchSystem} --parasolCommand $(shell pwd)/bin/remparasol \
+              --maxJobDuration ${maxJobDuration} --maxThreads ${maxThreads} --stats

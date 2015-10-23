@@ -5,12 +5,25 @@
 ####################################################################################################
 
 GORILLA_VERSION = susie_3_1
-mappedOrgs = chimp gorilla orang squirrel_monkey
-allOrgs = chimp gorilla orang squirrel_monkey human
+srcOrg = human
+srcOrgHgDb = hg38
+
+ifeq (${GORILLA_VERSION},susie_3_1)
+mappedOrgs = chimp gorilla 
+allOrgs = chimp gorilla human
 GENCODE_VERSION = V23
 TRANS_MAP_VERSION = 2015-10-06
 CHAINING_VERSION = 2015-08-19
 COMPARATIVE_ANNOTATOR_VERSION = 2015-10-12
 
-srcOrg = human
-srcOrgHgDb = hg38
+else ifeq (${GORILLA_VERSION},susie_3)
+mappedOrgs = chimp gorilla
+allOrgs = chimp gorilla human
+GENCODE_VERSION = V23
+TRANS_MAP_VERSION = 2015-10-06
+CHAINING_VERSION = 2015-08-19
+COMPARATIVE_ANNOTATOR_VERSION = 2015-10-12
+
+else
+$(error config.mk variables not defined for GORILLA_VERSION=${GORILLA_VERSION})
+endif
