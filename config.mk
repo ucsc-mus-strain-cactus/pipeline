@@ -9,7 +9,8 @@ srcOrg = human
 srcOrgHgDb = hg38
 
 ifeq (${GORILLA_VERSION},susie_3_1)
-mappedOrgs = chimp gorilla 
+mappedOrgs = chimp gorilla
+augustusOrgs = chimp gorilla 
 allOrgs = chimp gorilla human
 GENCODE_VERSION = V23
 TRANS_MAP_VERSION = 2015-10-06
@@ -18,6 +19,7 @@ COMPARATIVE_ANNOTATOR_VERSION = 2015-10-12
 
 else ifeq (${GORILLA_VERSION},susie_3)
 mappedOrgs = chimp gorilla
+augustusOrgs = chimp gorilla 
 allOrgs = chimp gorilla human
 GENCODE_VERSION = V23
 TRANS_MAP_VERSION = 2015-10-06

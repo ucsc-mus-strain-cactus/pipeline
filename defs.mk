@@ -13,6 +13,8 @@ ASM_GENOMES_DIR = ${GORILLA_DATA_DIR}/assemblies/${GORILLA_VERSION}
 CHAIN_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/chains
 ANNOTATION_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/comparativeAnnotation/${COMPARATIVE_ANNOTATOR_VERSION}
 
+DONE_FLAG_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/completion_flags
+
 ###
 # genome and organisms.  The term `org' indicated the abbreviation for the organism,
 # the term `orgDb' refers to the browser database name, in the form Mus${org}_${GORILLA_VERSION}
@@ -41,7 +43,7 @@ gencodeBasic = GencodeBasic${GENCODE_VERSION}
 gencodeComp = GencodeComp${GENCODE_VERSION}
 gencodePseudo = GencodePseudoGene${GENCODE_VERSION}
 gencodeAttrs = GencodeAttrs${GENCODE_VERSION}
-gencodeSubsets = ${gencodeBasic} ${gencodeComp} ${gencodePseudo}
+gencodeSubsets = ${gencodeComp} #${gencodeBasic} ${gencodeComp} ${gencodePseudo}
 
 # GENCODE src annotations based on hgDb databases above
 srcGencodeBasic = wgEncode${gencodeBasic}
@@ -71,7 +73,7 @@ transMapGencodeBasic = transMap${gencodeBasic}
 transMapGencodeComp = transMap${gencodeComp}
 transMapGencodePseudo = transMap${gencodePseudo}
 transMapGencodeAttrs = transMap${gencodeAttrs}
-transMapGencodeSubsets = ${transMapGencodeBasic} ${transMapGencodeComp} ${transMapGencodePseudo}
+transMapGencodeSubsets = ${transMapGencodeComp} # ${transMapGencodeBasic} ${transMapGencodeComp} ${transMapGencodePseudo}
 
 ##
 # Sequence files
@@ -158,7 +160,7 @@ KENT_HG_LIB_DIR = ${KENT_DIR}/src/hg/lib
 jobTreeRootTmpDir = jobTree.tmp/${GORILLA_VERSION}
 
 # jobTree configuration
-batchSystem = parasol
+batchSystem = singleMachine
 maxThreads = 20
 defaultMemory = 8589934592
 maxJobDuration = 28800
