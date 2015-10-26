@@ -8,7 +8,7 @@ assemblyHubDir = ${comparativeAnnotationDir}/assemblyHub
 jobTreeTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/assembly_hub/${mapTargetOrg}/${gencodeSubset}
 jobTreeJobOutput = ${jobTreeTmpDir}/assembly_hub.out
 jobTreeJobDir = ${jobTreeTmpDir}/jobTree
-jobTreeDone = ${doneFlagDir}/assemblyHub.done
+jobTreeDone = ${DONE_FLAG_DIR}/assemblyHub.done
 
 
 endif

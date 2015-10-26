@@ -8,9 +8,7 @@ ifneq (${gencodeSubset},)
 # output location
 comparativeAnnotationDir = ${ANNOTATION_DIR}/${gencodeSubset}
 metricsDir = ${comparativeAnnotationDir}/metrics
-# done flag dir
-doneFlagDir = ${DONE_FLAG_DIR}/${gencodeSubset}
-metricsFlag = ${doneFlagDir}/metrics.done
+metricsFlag = ${DONE_FLAG_DIR}/metrics.done
 
 endif
 
