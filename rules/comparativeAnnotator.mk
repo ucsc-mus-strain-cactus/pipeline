@@ -15,9 +15,9 @@ clean: ${gencodeSubsets:%=%.gencode.clean}
 %.gencode.clean:
 	${MAKE} -f rules/comparativeAnnotator.mk annotationGencodeSubsetClean gencodeSubset=$*
 
-annotationGencodeSubset: ${augustusOrgs:%=%.annotationGencodeSubset}
+annotationGencodeSubset: ${mappedOrgs:%=%.annotationGencodeSubset}
 
-annotationGencodeSubsetClean: ${augustusOrgs:%=%.annotationGencodeSubsetClean}
+annotationGencodeSubsetClean: ${mappedOrgs:%=%.annotationGencodeSubsetClean}
 
 %.annotationGencodeSubset:
 	${MAKE} -f rules/comparativeAnnotator.mk runOrg mapTargetOrg=$* gencodeSubset=${gencodeSubset}

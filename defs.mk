@@ -43,7 +43,7 @@ gencodeBasic = GencodeBasic${GENCODE_VERSION}
 gencodeComp = GencodeComp${GENCODE_VERSION}
 gencodePseudo = GencodePseudoGene${GENCODE_VERSION}
 gencodeAttrs = GencodeAttrs${GENCODE_VERSION}
-gencodeSubsets = ${gencodeComp} #${gencodeBasic} ${gencodeComp} ${gencodePseudo}
+gencodeSubsets = ${gencodeBasic} #${gencodeBasic} ${gencodeComp} ${gencodePseudo}
 
 # GENCODE src annotations based on hgDb databases above
 srcGencodeBasic = wgEncode${gencodeBasic}
@@ -73,7 +73,7 @@ transMapGencodeBasic = transMap${gencodeBasic}
 transMapGencodeComp = transMap${gencodeComp}
 transMapGencodePseudo = transMap${gencodePseudo}
 transMapGencodeAttrs = transMap${gencodeAttrs}
-transMapGencodeSubsets = ${transMapGencodeComp} # ${transMapGencodeBasic} ${transMapGencodeComp} ${transMapGencodePseudo}
+transMapGencodeSubsets = ${transMapGencodeBasic} # ${transMapGencodeBasic} ${transMapGencodeComp} ${transMapGencodePseudo}
 
 ##
 # Sequence files
@@ -162,7 +162,7 @@ jobTreeRootTmpDir = jobTree.tmp/${GORILLA_VERSION}
 # jobTree configuration
 batchSystem = parasol
 maxThreads = 20
-defaultMemory = 8589934592
+defaultMemory = 17179869184
 maxJobDuration = 28800
 jobTreeOpts = --defaultMemory ${defaultMemory} --batchSystem ${batchSystem} --parasolCommand $(shell pwd)/bin/remparasol \
               --maxJobDuration ${maxJobDuration} --maxThreads ${maxThreads} --stats
