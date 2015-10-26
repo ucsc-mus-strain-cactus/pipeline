@@ -42,6 +42,6 @@ ${jobTreeDone}:
 
 
 assemblyHubGencodeSubsetClean:
-	rm -rf ${jobTreeDone} ${jobTreeJobDir}
+	rm -rf ${jobTreeDone} ${jobTreeJobDir} ${assemblyHubDir}
 
 endif
