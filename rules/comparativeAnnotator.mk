@@ -52,6 +52,9 @@ clusteringDone = ${doneFlagDir}/classifierClustering.done
 # output location
 comparativeAnnotationDir = ${ANNOTATION_DIR}/${gencodeSubset}
 metricsDir = ${comparativeAnnotationDir}/metrics
+# output additional files
+annotationBed = ${comparativeAnnotationDir}/bedfiles/transMap/${mapTargetOrg}/${gencodeSubset}.bed
+annotationBigBed = ${comparativeAnnotationDir}/bigBedfiles/transMap/${mapTargetOrg}/${gencodeSubset}.bb
 
 # input files
 transMapDataDir = ${TRANS_MAP_DIR}/transMap/${mapTargetOrg}
@@ -62,7 +65,7 @@ targetGp = ${transMapDataDir}/transMap${gencodeSubset}.gp
 targetFasta = ${ASM_GENOMES_DIR}/${mapTargetOrg}.fa
 targetSizes = ${ASM_GENOMES_DIR}/${mapTargetOrg}.chrom.sizes
 
-runOrg: ${comparativeAnnotationDone} ${clusteringDone}
+runOrg: ${comparativeAnnotationDone} ${annotationBed} ${annotationBigBed} ${clusteringDone}
 
 ${comparativeAnnotationDone}: ${psl} ${targetGp} ${refGp} ${refFasta} ${targetFasta} ${targetSizes}
 	@mkdir -p $(dir $@)
@@ -73,6 +76,16 @@ ${comparativeAnnotationDone}: ${psl} ${targetGp} ${refGp} ${refFasta} ${targetFa
 	--fasta ${targetFasta} --refFasta ${refFasta} --sizes ${targetSizes} --outDir ${comparativeAnnotationDir} \
 	--gencodeAttributes ${srcGencodeAttrsTsv} --jobTree ${jobTreeCompAnnJobDir} &> ${jobTreeCompAnnJobOutput}
 	touch $@
+
+${annotationBed}: ${comparativeAnnotationDone}
+	@mkdir -p $(dir $@)
+	genePredToBed ${targetGp} $@.${tmpExt}
+	mv -f $@.${tmpExt} $@
+
+${annotationBigBed}: ${annotationBed}
+	@mkdir -p $(dir $@)
+	bedToBigBed  $< ${targetSizes} $@.${tmpExt}
+	mv -f $@.${tmpExt} $@
 
 ${clusteringDone}: ${comparativeAnnotationDone}
 	@mkdir -p $(dir $@)

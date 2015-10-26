@@ -5,7 +5,7 @@ comparativeAnnotationDir = ${ANNOTATION_DIR}/${gencodeSubset}
 assemblyHubDir = ${comparativeAnnotationDir}/assemblyHub
 
 # jobTree
-jobTreeTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/assembly_hub/${mapTargetOrg}/${gencodeSubset}
+jobTreeTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/assembly_hub/${gencodeSubset}
 jobTreeJobOutput = ${jobTreeTmpDir}/assembly_hub.out
 jobTreeJobDir = ${jobTreeTmpDir}/jobTree
 jobTreeDone = ${DONE_FLAG_DIR}/assemblyHub.done
