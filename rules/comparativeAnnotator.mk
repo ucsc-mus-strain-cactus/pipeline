@@ -84,7 +84,7 @@ ${annotationBed}: ${comparativeAnnotationDone}
 
 ${annotationBigBed}: ${annotationBed}
 	@mkdir -p $(dir $@)
-	bedToBigBed  $< ${targetSizes} $@.${tmpExt}
+	bedToBigBed $< ${targetSizes} $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
 ${clusteringDone}: ${comparativeAnnotationDone}

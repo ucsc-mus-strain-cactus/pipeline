@@ -16,10 +16,15 @@ endif
 
 all: assemblyHub
 
+clean: ${gencodeSubsets:%=%.assemblyHubClean}
+
 assemblyHub: ${gencodeSubsets:%=%.assemblyHub}
 
 %.assemblyHub:
 	${MAKE} -f rules/assemblyHub.mk assemblyHubGencodeSubset gencodeSubset=$*
+
+%.assemblyHubClean:
+	${MAKE} -f rules/assemblyHub.mk assemblyHubGencodeSubsetClean gencodeSubset=$*
 
 ifneq (${gencodeSubset},)
 assemblyHubGencodeSubset: ${jobTreeDone}
@@ -34,5 +39,9 @@ ${jobTreeDone}:
 	--finalBigBedDirs $$bigBedDirs --shortLabel ${GORILLA_VERSION} --longLabel ${GORILLA_VERSION} \
 	--hub ${GORILLA_VERSION} &> ${jobTreeJobOutput}
 	touch $@
+
+
+assemblyHubGencodeSubsetClean:
+	rm -rf ${jobTreeDone} ${jobTreeJobDir}
 
 endif
