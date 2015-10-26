@@ -160,7 +160,7 @@ KENT_HG_LIB_DIR = ${KENT_DIR}/src/hg/lib
 jobTreeRootTmpDir = jobTree.tmp/${GORILLA_VERSION}
 
 # jobTree configuration
-batchSystem = singleMachine
+batchSystem = parasol
 maxThreads = 20
 defaultMemory = 8589934592
 maxJobDuration = 28800
