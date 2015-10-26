@@ -13,7 +13,7 @@ ASM_GENOMES_DIR = ${GORILLA_DATA_DIR}/assemblies/${GORILLA_VERSION}
 CHAIN_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/chains
 ANNOTATION_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/comparativeAnnotation/${COMPARATIVE_ANNOTATOR_VERSION}
 
-DONE_FLAG_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/completion_flags
+DONE_FLAG_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/pipeline_completion_flags
 
 ###
 # genome and organisms.  The term `org' indicated the abbreviation for the organism,
