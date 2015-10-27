@@ -5,11 +5,11 @@
 # NOTE: The order in which you write the organsims will determine the order of plots.
 ####################################################################################################
 
-GORILLA_VERSION = susie_3_1
+VERSION = susie_3_1
 srcOrg = human
 srcOrgHgDb = hg38
 
-ifeq (${GORILLA_VERSION},susie_3_1)
+ifeq (${VERSION},susie_3_1)
 mappedOrgs = gorilla gorGor3 orang chimp squirrel_monkey
 augustusOrgs = gorilla
 allOrgs = human gorilla gorGor3 orang chimp squirrel_monkey
@@ -18,7 +18,7 @@ TRANS_MAP_VERSION = 2015-10-06
 CHAINING_VERSION = 2015-08-19
 COMPARATIVE_ANNOTATOR_VERSION = 2015-10-12
 
-else ifeq (${GORILLA_VERSION},susie_3)
+else ifeq (${VERSION},susie_3)
 mappedOrgs = gorilla orang chimp squirrel_monkey
 augustusOrgs = gorilla
 allOrgs = human gorilla orang chimp squirrel_monkey
@@ -28,5 +28,5 @@ CHAINING_VERSION = 2015-08-19
 COMPARATIVE_ANNOTATOR_VERSION = 2015-10-12
 
 else
-$(error config.mk variables not defined for GORILLA_VERSION=${GORILLA_VERSION})
+$(error config.mk variables not defined for VERSION=${VERSION})
 endif
