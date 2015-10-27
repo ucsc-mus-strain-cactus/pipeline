@@ -1,37 +1,37 @@
 include ../pipeline/config.mk
 
 # base directory definitions
-GORILLA_PROJ_DIR = /hive/groups/recon/projs/gorilla_eichler
-GORILLA_DATA_DIR = ${GORILLA_PROJ_DIR}/pipeline_data
-GORILLA_ASSMEBLIES_DIR = ${GORILLA_DATA_DIR}/assemblies/${GORILLA_VERSION}
-HAL_BIN_DIR = ${GORILLA_PROJ_DIR}/src/progressiveCactus/submodules/hal/bin
-PYCBIO_DIR = ${GORILLA_PROJ_DIR}/src/pycbio
+PROJ_DIR = /hive/groups/recon/projs/gorilla_eichler
+DATA_DIR = ${PROJ_DIR}/pipeline_data
+ASSMEBLIES_DIR = ${DATA_DIR}/assemblies/${VERSION}
+HAL_BIN_DIR = ${PROJ_DIR}/src/progressiveCactus/submodules/hal/bin
+PYCBIO_DIR = ${PROJ_DIR}/src/pycbio
 
-TRANS_MAP_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/transMap/${TRANS_MAP_VERSION}
+TRANS_MAP_DIR = ${DATA_DIR}/comparative/${VERSION}/transMap/${TRANS_MAP_VERSION}
 SRC_GENCODE_DATA_DIR = ${TRANS_MAP_DIR}/data
-ASM_GENOMES_DIR = ${GORILLA_DATA_DIR}/assemblies/${GORILLA_VERSION}
-CHAIN_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/chains
-ANNOTATION_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/comparativeAnnotation/${COMPARATIVE_ANNOTATOR_VERSION}
+ASM_GENOMES_DIR = ${DATA_DIR}/assemblies/${VERSION}
+CHAIN_DIR = ${DATA_DIR}/comparative/${VERSION}/chains
+ANNOTATION_DIR = ${DATA_DIR}/comparative/${VERSION}/comparativeAnnotation/${COMPARATIVE_ANNOTATOR_VERSION}
 
-DONE_FLAG_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/pipeline_completion_flags
+DONE_FLAG_DIR = ${DATA_DIR}/comparative/${VERSION}/pipeline_completion_flags
 
 ###
 # genome and organisms.  The term `org' indicated the abbreviation for the organism,
-# the term `orgDb' refers to the browser database name, in the form Mus${org}_${GORILLA_VERSION}
+# the term `orgDb' refers to the browser database name, in the form Mus${org}_${VERSION}
 ###
 allOrgs = ${srcOrg} ${mappedOrgs}
 
 # this is function to generate the orgDb name from an org, use it with:
 #    $(call orgToOrgDbFunc,${yourOrg})
-orgToOrgDbFunc = ${1}_${GORILLA_VERSION}
+orgToOrgDbFunc = ${1}_${VERSION}
 
 # HAL file with simple and browser database names (e.g. Mus_XXX_1411)
-halFile = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}.hal
-halBrowserFile = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}_browser.hal
+halFile = ${DATA_DIR}/comparative/${VERSION}/cactus/${VERSION}.hal
+halBrowserFile = ${DATA_DIR}/comparative/${VERSION}/cactus/${VERSION}_browser.hal
 
 # LODs (based off the halBrowserFile)
-lodTxtFile = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}_lod.txt
-lodDir = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/cactus/${GORILLA_VERSION}_lods
+lodTxtFile = ${DATA_DIR}/comparative/${VERSION}/cactus/${VERSION}_lod.txt
+lodDir = ${DATA_DIR}/comparative/${VERSION}/cactus/${VERSION}_lods
 
 
 ###
@@ -57,16 +57,6 @@ srcGencodeAllFa = ${srcGencodeSubsets:%=${SRC_GENCODE_DATA_DIR}/%.fa}
 srcGencodeAllPsl = ${srcGencodeSubsets:%=${SRC_GENCODE_DATA_DIR}/%.psl}
 srcGencodeAllCds = ${srcGencodeSubsets:%=${SRC_GENCODE_DATA_DIR}/%.cds}
 srcGencodeAllBed = ${srcGencodeSubsets:%=${SRC_GENCODE_DATA_DIR}/%.bed}
-
-###
-# transmap
-###
-
-# chaining methods used by transmap
-transMapChainingMethods = simpleChain all syn
-
-# call function to get transmap directory given org and chain method
-transMapDataDirFunc = ${TRANS_MAP_DIR}/transMap/${1}/${2}
 
 # hgDb tables used in transMap/comparativeAnnotator
 transMapGencodeBasic = transMap${gencodeBasic}
@@ -95,14 +85,22 @@ queryFasta = $(call asmFastaFunc,${srcOrg})
 queryTwoBit = $(call asmTwoBitFunc,${srcOrg})
 queryChromSizes = $(call asmChromSizesFunc,${srcOrg})
 
+##
+# AugustusTMR
+# at this point is only run on one gencode subset to avoid wasted computation
+##
+augustusGencodeSet = ${gencodeBasic}
+AUGUSTUS_DIR = ${DATA_DIR}/comparative/${VERSION}/augustus
+AUGUSTUS_TMR_DIR = ${AUGUSTUS_DIR}/tmr
+AUGUSTUS_WORK_DIR = ${AUGUSTUS_DIR}/work
 
 # comparative anotations types produced
-compAnnTypes = alignmentErrors allProblems assemblyErrors comparativeAnnotation inFrameStop interestingBiology
+compAnnTypes = allClassifiers allAugustusClassifiers potentiallyInterestingBiology assemblyErrors alignmentErrors AugustusTMR
 
 ###
 # chaining
 ###
-CHAINING_DIR = ${GORILLA_DATA_DIR}/comparative/${GORILLA_VERSION}/chaining/${CHAINING_VERSION}
+CHAINING_DIR = ${DATA_DIR}/comparative/${VERSION}/chaining/${CHAINING_VERSION}
 
 # call function to  to obtain path to chain/net files, given type,srcOrg,targetOrg.
 chainFunc = ${CHAINING_DIR}/${2}-${3}.${1}.chain.gz
@@ -130,9 +128,10 @@ tmpExt = ${host}.${ppid}.tmp
 SHELL = /bin/bash -beEu
 export SHELLOPTS := pipefail
 PYTHON_BIN = /hive/groups/recon/local/bin
+AUGUSTUS_BIN_DIR = /cluster/home/mario/augustus/trunks/bin
 
 python = ${PYTHON_BIN}/python
-export PATH := ${PYTHON_BIN}:${PYCBIO_DIR}/bin:./bin:${HAL_BIN_DIR}:${PATH}
+export PATH := ${PYTHON_BIN}:${PYCBIO_DIR}/bin:./bin:${HAL_BIN_DIR}:${AUGUSTUS_BIN_DIR}:${PATH}
 export PYTHONPATH := ./:${PYTHONPATH}
 
 ifneq (${HOSTNAME},hgwdev)
@@ -157,12 +156,12 @@ KENT_HG_LIB_DIR = ${KENT_DIR}/src/hg/lib
 
 # root directory for jobtree jobs.  Subdirectories should
 # be create for each task
-jobTreeRootTmpDir = jobTree.tmp/${GORILLA_VERSION}
+jobTreeRootTmpDir = jobTree.tmp/${VERSION}
 
 # jobTree configuration
 batchSystem = parasol
 maxThreads = 20
-defaultMemory = 17179869184
+defaultMemory = 8589934592
 maxJobDuration = 28800
 jobTreeOpts = --defaultMemory ${defaultMemory} --batchSystem ${batchSystem} --parasolCommand $(shell pwd)/bin/remparasol \
               --maxJobDuration ${maxJobDuration} --maxThreads ${maxThreads} --stats
