@@ -79,6 +79,10 @@ outputBb = ${outputDir}/bigBed/${mapTargetOrg}.bb
 outputBbSym = ${comparativeAnnotationDir}/bigBedfiles/AugustusTMR/${mapTargetOrg}/${mapTargetOrg}.bb
 outputBed = ${comparativeAnnotationDir}/bedfiles/AugustusTMR/${mapTargetOrg}/${mapTargetOrg}.bed
 
+augustusFaDir = ${AUGUSTUS_WORK_DIR}/fastas
+augustusFa = ${augustusFaDir}/${mapTargetOrg}.fa
+augustusFaidx = ${augustusFaDir}/${mapTargetOrg}.fa.fai
+
 consensusDir = ${comparativeAnnotationDir}/consensus
 consensusWorkDir = ${AUGUSTUS_WORK_DIR}/consensus
 consensusDone = ${doneFlagDir}/consensus.done
@@ -87,7 +91,8 @@ compGp = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeComp}.gp
 basicGp = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeBasic}.gp
 
 runOrg: ${intronVector} ${sortedGp} ${inputGp} ${outputGtf} ${outputGp} ${outputBed12_8} ${outputBb} ${outputBbSym} \
-		${outputBed} ${augustusComparativeAnnotationDone} ${augustusAlignmentDone} ${consensusDone}
+	${outputBed} ${augustusFa} ${augustusFaidx} ${augustusComparativeAnnotationDone} \
+	${augustusAlignmentDone} ${consensusDone}
 
 ${intronVector}:
 	@mkdir -p $(dir $@)
@@ -137,6 +142,15 @@ ${outputBed}: ${outputGp}
 	genePredToBed $< $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
+${augustusFa}: ${outputBed}
+	@mkdir -p $(dir $@)
+	fastaFromBed -fi ${targetFasta} -fo $@.${tmpExt} -bed $< -name -s -split
+	mv -f $@.${tmpExt} $@
+
+${augustusFaidx}: ${augustusFa}
+	@mkdir -p $(dir $@)
+	samtools faidx $<
+
 ${augustusComparativeAnnotationDone}: ${outputGp}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeAugustusCompAnnTmpDir}
@@ -147,12 +161,12 @@ ${augustusComparativeAnnotationDone}: ${outputGp}
 	--augustusGp $< &> ${jobTreeAugustusCompAnnJobOutput}
 	touch $@
 
-${augustusAlignmentDone}: ${outputGp}
+${augustusAlignmentDone}: ${augustusFa} ${augustusFaidx}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeAlignAugustusTmpDir}
 	cd ../comparativeAnnotator && ${python} augustus/align_augustus.py ${jobTreeOpts} \
-	--genome ${mapTargetOrg} --refFasta ${refFasta} --targetFasta ${targetFasta} \
-	--refGp ${refGp} --augGp ${outputGp} --outDir ${comparativeAnnotationDir} \
+	--genome ${mapTargetOrg} --refTranscriptFasta ${refTranscriptFasta} --targetTranscriptFasta ${augustusFa} \
+	--targetTranscriptFastaIndex ${augustusFaidx} --outDir ${comparativeAnnotationDir} \
 	--jobTree ${jobTreeAlignAugustusJobDir} &> ${jobTreeAlignAugustusJobOutput}
 	touch $@
 
