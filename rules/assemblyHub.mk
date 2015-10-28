@@ -39,8 +39,8 @@ ${jobTreeDone}:
 	bigBedDirs="$(shell /bin/ls -1d ${comparativeAnnotationDir}/bigBedfiles/* | paste -s -d ",")" ;\
 	cd ../comparativeAnnotator && python hal/assemblyHub/hal2assemblyHub.py ${jobTreeOpts} \
 	--batchSystem singleMachine --jobTree ${jobTreeJobDir} ${halFile} ${assemblyHubDir} \
-	--finalBigBedDirs $$bigBedDirs --shortLabel ${GORILLA_VERSION} --longLabel ${GORILLA_VERSION} \
-	--hub ${GORILLA_VERSION} &> ${jobTreeJobOutput}
+	--finalBigBedDirs $$bigBedDirs --shortLabel ${VERSION} --longLabel ${VERSION} \
+	--hub ${VERSION} &> ${jobTreeJobOutput}
 	touch $@
 
 

@@ -17,6 +17,7 @@ GENCODE_VERSION = V23
 TRANS_MAP_VERSION = 2015-10-06
 CHAINING_VERSION = 2015-08-19
 COMPARATIVE_ANNOTATOR_VERSION = 2015-10-12
+hintsDb = /hive/groups/recon/projs/gorilla_eichler/pipeline_data/comparative/susie_3_1/augustus/hints.db
 
 else ifeq (${VERSION},susie_3)
 mappedOrgs = gorilla orang chimp squirrel_monkey
