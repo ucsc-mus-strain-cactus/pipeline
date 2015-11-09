@@ -65,7 +65,7 @@ ${clusteringDone}: ${comparativeAnnotationDone}
 	cd ../comparativeAnnotator && ${python} plotting/clustering.py ${jobTreeOpts} \
 	--genome ${srcOrg} --refGenome ${srcOrg} --outDir ${metricsDir} \
 	--comparativeAnnotationDir ${comparativeAnnotationDir} --gencode ${gencodeSubset} \
-	--jobTree ${jobTreeClusteringJobDir} &> ${jobTreeClusteringJobOutput}
+	--jobTree ${jobTreeClusteringJobDir} --mode reference &> ${jobTreeClusteringJobOutput}
 	touch $@
 
 annotationGencodeSubsetClean:
