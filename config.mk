@@ -5,29 +5,48 @@
 # NOTE: The order in which you write the organsims will determine the order of plots.
 ####################################################################################################
 
+# general config options
 VERSION = susie_3_1
 srcOrg = human
 srcOrgHgDb = hg38
-
-ifeq (${VERSION},susie_3_1)
 mappedOrgs = gorilla gorGor3 orang chimp squirrel_monkey
 augustusOrgs = gorilla
-allOrgs = human gorilla gorGor3 orang chimp squirrel_monkey
-GENCODE_VERSION = V23
-TRANS_MAP_VERSION = 2015-10-06
-CHAINING_VERSION = 2015-08-19
-COMPARATIVE_ANNOTATOR_VERSION = 2015-10-12
-hintsDb = /hive/groups/recon/projs/gorilla_eichler/pipeline_data/comparative/susie_3_1/augustus/hints.db
+gencodeVersion = V23
+gencodeGeneSet = GencodeBasic
 
-else ifeq (${VERSION},susie_3)
-mappedOrgs = gorilla orang chimp squirrel_monkey
-augustusOrgs = gorilla
-allOrgs = human gorilla orang chimp squirrel_monkey
-GENCODE_VERSION = V23
-TRANS_MAP_VERSION = 2015-10-06
-CHAINING_VERSION = 2015-08-19
-COMPARATIVE_ANNOTATOR_VERSION = 2015-10-12
+# HAL file
+halFile = ${DATA_DIR}/comparative/${VERSION}/cactus/${VERSION}.hal
 
-else
-$(error config.mk variables not defined for VERSION=${VERSION})
-endif
+# base project directory that all files will be made in
+PROJ_DIR = /hive/groups/recon/projs/gorilla_eichler
+
+# SQL command
+mysql = mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A
+
+###
+# parasol
+###
+parasolHost = ku
+
+# jobTree configuration
+batchSystem = parasol
+maxThreads = 20
+defaultMemory = 8589934592
+maxJobDuration = 28800
+jobTreeOpts = --defaultMemory ${defaultMemory} --batchSystem ${batchSystem} --parasolCommand $(shell pwd -P)/bin/remparasol \
+              --maxJobDuration ${maxJobDuration} --maxThreads ${maxThreads} --stats
+
+
+# binary locations
+PYTHON_BIN_DIR = /hive/groups/recon/local/bin
+AUGUSTUS_BIN_DIR = /hive/users/ifiddes/augustus/trunks/bin
+
+# hard coded hal bin path in relative comparativeAnnotator location
+HAL_BIN_DIR = ../comparativeAnnotator/submodules/hal/bin
+
+# TODO: get Mark's pycbio library as a package in either comparativeAnnotator or pipeline repo
+PYCBIO_DIR = ${PROJ_DIR}/src/pycbio
+python = ${PYTHON_BIN_DIR}/python
+
+KENT_DIR = ${HOME}/kent
+KENT_HG_LIB_DIR = ${KENT_DIR}/src/hg/lib

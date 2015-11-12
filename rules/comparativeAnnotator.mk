@@ -3,76 +3,58 @@
 ####
 include defs.mk
 
-all: gencode
+all: ${mappedOrgs:%=%.mapOrg}
 
-gencode: ${gencodeSubsets:%=%.gencode}
+clean: ${mappedOrgs:%=%.mapOrgClean}
 
-clean: ${gencodeSubsets:%=%.gencode.clean}
+%.maporg:
+	${MAKE} -f rules/comparativeAnnotator.mk runOrg mapTargetOrg=$*
 
-%.gencode:
-	${MAKE} -f rules/comparativeAnnotator.mk annotationGencodeSubset gencodeSubset=$*
+%.mapOrgClean:
+	${MAKE} -f rules/comparativeAnnotator.mk cleanOrg mapTargetOrg=$*
 
-%.gencode.clean:
-	${MAKE} -f rules/comparativeAnnotator.mk annotationGencodeSubsetClean gencodeSubset=$*
-
-annotationGencodeSubset: ${mappedOrgs:%=%.annotationGencodeSubset}
-
-annotationGencodeSubsetClean: ${mappedOrgs:%=%.annotationGencodeSubsetClean}
-
-%.annotationGencodeSubset:
-	${MAKE} -f rules/comparativeAnnotator.mk runOrg mapTargetOrg=$* gencodeSubset=${gencodeSubset}
-
-%.annotationGencodeSubsetClean:
-	${MAKE} -f rules/comparativeAnnotator.mk cleanOrg mapTargetOrg=$* gencodeSubset=${gencodeSubset}
-
-ifneq (${gencodeSubset},)
 ifneq (${mapTargetOrg},)
 
 # comparativeAnnotator mode
 mode = transMap
 
 # done flag dir
-doneFlagDir = ${DONE_FLAG_DIR}/${mapTargetOrg}/${gencodeSubset}
+doneFlagDir = ${DONE_FLAG_DIR}/${mapTargetOrg}
 
-#######
-# These will run for every combination of GencodeSubset-mapTargetOrg
-#######
 # jobTree (for transMap comparativeAnnotator)
-jobTreeCompAnnTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/comparativeAnnotator/${mapTargetOrg}/${gencodeSubset}
+jobTreeCompAnnTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/comparativeAnnotator/${mapTargetOrg}
 jobTreeCompAnnJobOutput = ${jobTreeCompAnnTmpDir}/comparativeAnnotator.out
 jobTreeCompAnnJobDir = ${jobTreeCompAnnTmpDir}/jobTree
 comparativeAnnotationDone = ${doneFlagDir}/comparativeAnnotation.done
 
 # jobTree (for clustering classifiers)
-jobTreeClusteringTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/clustering/${mapTargetOrg}/${gencodeSubset}
+jobTreeClusteringTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/clustering/${mapTargetOrg}
 jobTreeClusteringJobOutput = ${jobTreeClusteringTmpDir}/clustering.out
 jobTreeClusteringJobDir = ${jobTreeClusteringTmpDir}/jobTree
 clusteringDone = ${doneFlagDir}/classifierClustering.done
 
 # output location
-comparativeAnnotationDir = ${ANNOTATION_DIR}/${gencodeSubset}
+comparativeAnnotationDir = ${ANNOTATION_DIR}
 metricsDir = ${comparativeAnnotationDir}/metrics
 
 # input files
 transMapDataDir = ${TRANS_MAP_DIR}/transMap/${mapTargetOrg}
-refGp = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeSubset}.gp
+psl = ${transMapDataDir}/${gencodeGenes}.psl
+targetGp = ${transMapDataDir}/${gencodeGenes}.gp
 refFasta = ${ASM_GENOMES_DIR}/${srcOrg}.fa
-psl = ${transMapDataDir}/transMap${gencodeSubset}.psl
-refPsl = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeSubset}.psl
-targetGp = ${transMapDataDir}/transMap${gencodeSubset}.gp
 targetFasta = ${ASM_GENOMES_DIR}/${mapTargetOrg}.fa
 targetSizes = ${ASM_GENOMES_DIR}/${mapTargetOrg}.chrom.sizes
 
 runOrg: ${comparativeAnnotationDone} ${clusteringDone}
 
-${comparativeAnnotationDone}: ${psl} ${targetGp} ${refGp} ${refFasta} ${targetFasta} ${targetSizes}
+${comparativeAnnotationDone}: ${psl} ${targetGp} ${srcGencodeGp} ${refFasta} ${targetFasta} ${targetSizes}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${comparativeAnnotationDir}
 	@mkdir -p ${jobTreeCompAnnTmpDir}
 	cd ../comparativeAnnotator && ${python} src/annotation_pipeline.py ${mode} ${jobTreeOpts} \
-	--refGenome ${srcOrg} --genome ${mapTargetOrg} --annotationGp ${refGp} --psl ${psl} --targetGp ${targetGp} \
+	--refGenome ${srcOrg} --genome ${mapTargetOrg} --annotationGp ${srcGencodeGp} --psl ${psl} --targetGp ${targetGp} \
 	--fasta ${targetFasta} --refFasta ${refFasta} --sizes ${targetSizes} --outDir ${comparativeAnnotationDir} \
-	--gencodeAttributes ${srcGencodeAttrsTsv} --jobTree ${jobTreeCompAnnJobDir} --refPsl ${refPsl} \
+	--gencodeAttributes ${srcGencodeAttrsTsv} --jobTree ${jobTreeCompAnnJobDir} --refPsl ${srcGencodePsl} \
 	&> ${jobTreeCompAnnJobOutput}
 	touch $@
 
@@ -81,7 +63,7 @@ ${clusteringDone}: ${comparativeAnnotationDone}
 	@mkdir -p ${jobTreeClusteringTmpDir}
 	cd ../comparativeAnnotator && ${python} plotting/clustering.py --mode transMap ${jobTreeOpts} \
 	--genome ${mapTargetOrg} --refGenome ${srcOrg} --outDir ${metricsDir} \
-	--comparativeAnnotationDir ${comparativeAnnotationDir} --gencode ${gencodeSubset} \
+	--comparativeAnnotationDir ${comparativeAnnotationDir} --gencode ${gencodeGenes} \
 	--jobTree ${jobTreeClusteringJobDir} &> ${jobTreeClusteringJobOutput}
 	touch $@
 
@@ -89,5 +71,4 @@ ${clusteringDone}: ${comparativeAnnotationDone}
 cleanOrg:
 	rm -rf ${jobTreeCompAnnJobDir} ${comparativeAnnotationDone} ${jobTreeClusteringJobDir} ${clusteringDone}
 
-endif
 endif

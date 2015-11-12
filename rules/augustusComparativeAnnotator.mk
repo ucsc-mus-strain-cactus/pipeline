@@ -11,7 +11,7 @@ clean: ${augustusOrgs:%=%.cleanOrg}
 
 ${codingTranscriptList}:
 	@mkdir -p $(dir $@)
-	hgsql -e "SELECT transcriptId,transcriptClass FROM ${srcGencodeAttrs}" ${srcOrgHgDb} | \
+	${mysql} -e "SELECT transcriptId,transcriptClass FROM ${srcGencodeAttrs}" ${srcOrgHgDb} | \
 	grep -P "\tcoding" | cut -f 1,1 > $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
@@ -28,49 +28,47 @@ ifneq (${mapTargetOrg},)
 mode = augustus
 
 # done flag dir
-doneFlagDir = ${DONE_FLAG_DIR}/${mapTargetOrg}/${augustusGencodeSet}
+doneFlagDir = ${DONE_FLAG_DIR}/${mapTargetOrg}
 
 # output location
-comparativeAnnotationDir = ${ANNOTATION_DIR}/${augustusGencodeSet}
+comparativeAnnotationDir = ${ANNOTATION_DIR}
 metricsDir = ${comparativeAnnotationDir}/metrics
 
 # input files
 transMapDataDir = ${TRANS_MAP_DIR}/transMap/${mapTargetOrg}
-refGp = ${SRC_GENCODE_DATA_DIR}/wgEncode${augustusGencodeSet}.gp
-refPsl = ${SRC_GENCODE_DATA_DIR}/wgEncode${augustusGencodeSet}.psl
+refGp = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeGenes}.gp
+refPsl = ${SRC_GENCODE_DATA_DIR}/wgEncode${gencodeGenes}.psl
 refFasta = ${ASM_GENOMES_DIR}/${srcOrg}.fa
-psl = ${transMapDataDir}/transMap${augustusGencodeSet}.psl
-targetGp = ${transMapDataDir}/transMap${augustusGencodeSet}.gp
+psl = ${transMapDataDir}/transMap${gencodeGenes}.psl
+targetGp = ${transMapDataDir}/transMap${gencodeGenes}.gp
 targetFasta = ${ASM_GENOMES_DIR}/${mapTargetOrg}.fa
 targetSizes = ${ASM_GENOMES_DIR}/${mapTargetOrg}.chrom.sizes
 
 # jobTree (for running Augustus)
-jobTreeAugustusTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/augustus/${mapTargetOrg}/${augustusGencodeSet}
+jobTreeAugustusTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/augustus/${mapTargetOrg}
 jobTreeAugustusJobOutput = ${jobTreeAugustusTmpDir}/augustus.out
 jobTreeAugustusJobDir = ${jobTreeAugustusTmpDir}/jobTree
 # Augustus does not need a completion flag because there is a single file output at the end (a genePred)
 
 # jobTree (for Augustus Comparative Annotator)
-jobTreeAugustusCompAnnTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/augustusComparativeAnnotator/${mapTargetOrg}/${augustusGencodeSet}
+jobTreeAugustusCompAnnTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/augustusComparativeAnnotator/${mapTargetOrg}
 jobTreeAugustusCompAnnJobOutput = ${jobTreeAugustusCompAnnTmpDir}/comparativeAnnotator.out
 jobTreeAugustusCompAnnJobDir = ${jobTreeAugustusCompAnnTmpDir}/jobTree
 augustusComparativeAnnotationDone = ${doneFlagDir}/augustusComparativeAnnotation.done
 
 # jobTree (for aligning transcripts)
-jobTreeAlignAugustusTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/augustusAlignToReference/${mapTargetOrg}/${augustusGencodeSet}
+jobTreeAlignAugustusTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/augustusAlignToReference/${mapTargetOrg}
 jobTreeAlignAugustusJobOutput = ${jobTreeAlignAugustusTmpDir}/alignAugustus.out
 jobTreeAlignAugustusJobDir = ${jobTreeAlignAugustusTmpDir}/jobTree
 augustusAlignmentDone =  ${doneFlagDir}/augustusAlignment.done
 
 # jobTree (for clustering classifiers)
-jobTreeClusterAugustusTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/augustusClusterToReference/${mapTargetOrg}/${augustusGencodeSet}
+jobTreeClusterAugustusTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/augustusClusterToReference/${mapTargetOrg}
 jobTreeClusterAugustusJobOutput = ${jobTreeClusterAugustusTmpDir}/clusterAugustus.out
 jobTreeClusterAugustusJobDir = ${jobTreeClusterAugustusTmpDir}/jobTree
 augustusClusterDone =  ${doneFlagDir}/augustusCluster.done
 
 # Files
-refTranscriptFasta = ${SRC_GENCODE_DATA_DIR}/wgEncode${augustusGencodeSet}.fa
-
 intronVectorDir = ${AUGUSTUS_WORK_DIR}/intron_vectors
 inputDir = ${AUGUSTUS_WORK_DIR}/input
 
@@ -83,7 +81,7 @@ outputGtf = ${outputDir}/${mapTargetOrg}.output.gtf
 outputGp = ${outputDir}/${mapTargetOrg}.output.gp
 outputBed12_8 = ${outputDir}/bed_12_8/${mapTargetOrg}.bed12-8
 outputBb = ${outputDir}/bigBed/${mapTargetOrg}.bb
-# outputBb is put in the comparative annotator bigBedfiles dir so it can be found by assemblyHub.mk
+# outputBb is symlinked to the comparative annotator bigBedfiles dir so it can be found by hal2assemblyhub
 outputBbSym = ${comparativeAnnotationDir}/bigBedfiles/AugustusTMR/${mapTargetOrg}/${mapTargetOrg}.bb
 outputBed = ${comparativeAnnotationDir}/bedfiles/AugustusTMR/${mapTargetOrg}/${mapTargetOrg}.bed
 
@@ -171,7 +169,7 @@ ${augustusAlignmentDone}: ${augustusFa} ${augustusFaidx}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeAlignAugustusTmpDir}
 	cd ../comparativeAnnotator && ${python} augustus/align_augustus.py ${jobTreeOpts} \
-	--genome ${mapTargetOrg} --refTranscriptFasta ${refTranscriptFasta} --targetTranscriptFasta ${augustusFa} \
+	--genome ${mapTargetOrg} --srcGencodeFa ${srcGencodeFa} --targetTranscriptFasta ${augustusFa} \
 	--targetTranscriptFastaIndex ${augustusFaidx} --outDir ${comparativeAnnotationDir} \
 	--jobTree ${jobTreeAlignAugustusJobDir} &> ${jobTreeAlignAugustusJobOutput}
 	touch $@
@@ -188,7 +186,7 @@ ${augustusClusterDone}: ${augustusComparativeAnnotationDone}
 	@mkdir -p ${jobTreeClusterAugustusTmpDir}
 	cd ../comparativeAnnotator && ${python} plotting/clustering.py ${jobTreeOpts} --mode augustus \
 	--genome ${mapTargetOrg} --refGenome ${srcOrg} --comparativeAnnotationDir ${comparativeAnnotationDir} \
-	--outDir ${metricsDir} --gencode ${augustusGencodeSet} --jobTree ${jobTreeClusterAugustusJobDir} \
+	--outDir ${metricsDir} --gencode ${gencodeGenes} --jobTree ${jobTreeClusterAugustusJobDir} \
 	&> ${jobTreeClusterAugustusJobOutput}
 	touch $@
 

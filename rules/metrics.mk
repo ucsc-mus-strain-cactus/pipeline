@@ -3,39 +3,19 @@
 #####
 include defs.mk
 
-ifneq (${gencodeSubset},)
-
 # output location
-comparativeAnnotationDir = ${ANNOTATION_DIR}/${gencodeSubset}
+comparativeAnnotationDir = ${ANNOTATION_DIR}
 metricsDir = ${comparativeAnnotationDir}/metrics
 metricsFlag = ${DONE_FLAG_DIR}/metrics.done
 
-endif
+all: ${metricsFlag}
 
-all: ${gencodeSubsets:%=%.gencode}
-
-clean: ${gencodeSubsets:%=%.gencodeClean}
-
-%.gencode:
-	${MAKE} -f rules/metrics.mk annotationGencodeSubset gencodeSubset=$* 
-
-%.gencodeClean:
-	${MAKE} -f rules/metrics.mk annotationGencodeSubsetClean gencodeSubset=$* 
-
-
-ifneq (${gencodeSubset},)
-
-annotationGencodeSubset: ${metricsFlag}
-
+clean:
+	rm -rf ${metricsFlag}
 
 ${metricsFlag}:
 	@mkdir -p $(dir $@)
 	cd ../comparativeAnnotator && ${python} plotting/transmap_analysis.py --outDir ${metricsDir} \
-	--genomes ${mappedOrgs} --refGenome ${srcOrg} --gencode ${gencodeSubset} \
+	--genomes ${mappedOrgs} --refGenome ${srcOrg} --gencode ${gencodeGenes} \
 	--comparativeAnnotationDir ${comparativeAnnotationDir}
 	touch $@
-
-annotationGencodeSubsetClean:
-	rm -rf ${metricsFlag}
-
-endif

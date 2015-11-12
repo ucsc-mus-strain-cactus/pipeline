@@ -4,34 +4,17 @@
 
 include defs.mk
 
-ifneq (${gencodeSubset},)
-comparativeAnnotationDir = ${ANNOTATION_DIR}/${gencodeSubset}
+comparativeAnnotationDir = ${ANNOTATION_DIR}
 assemblyHubDir = ${comparativeAnnotationDir}/assemblyHub
 
 # jobTree
-jobTreeTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/assembly_hub/${gencodeSubset}
+jobTreeTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/assembly_hub
 jobTreeJobOutput = ${jobTreeTmpDir}/assembly_hub.out
 jobTreeJobDir = ${jobTreeTmpDir}/jobTree
 jobTreeDone = ${DONE_FLAG_DIR}/assemblyHub.done
 
 
-endif
-
-
-all: assemblyHub
-
-clean: ${gencodeSubsets:%=%.assemblyHubClean}
-
-assemblyHub: ${gencodeSubsets:%=%.assemblyHub}
-
-%.assemblyHub:
-	${MAKE} -f rules/assemblyHub.mk assemblyHubGencodeSubset gencodeSubset=$*
-
-%.assemblyHubClean:
-	${MAKE} -f rules/assemblyHub.mk assemblyHubGencodeSubsetClean gencodeSubset=$*
-
-ifneq (${gencodeSubset},)
-assemblyHubGencodeSubset: ${jobTreeDone}
+all: ${jobTreeDone}
 
 ${jobTreeDone}:
 	@mkdir -p $(dir $@)
@@ -43,8 +26,5 @@ ${jobTreeDone}:
 	--hub ${VERSION} &> ${jobTreeJobOutput}
 	touch $@
 
-
-assemblyHubGencodeSubsetClean:
+clean:
 	rm -rf ${jobTreeDone} ${jobTreeJobDir} ${assemblyHubDir}
-
-endif
