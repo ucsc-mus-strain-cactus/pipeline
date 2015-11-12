@@ -51,7 +51,7 @@ ${fofn}:
 ${done}:
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeTmpDir}
-	cd ../comparativeAnnotator && ${python} augustus/build_hints_db.py ${jobTreeOpts} \
+	${python} comparativeAnnotator/augustus/build_hints_db.py ${jobTreeOpts} \
 	--genome ${mapTargetOrg} --bamFofn ${fofn} --fasta ${fasta} --database ${db} ${fc} ${ft} \
 	--jobTree ${jobTreeJobDir} --batchSystem singleMachine --maxThreads 20 &> ${jobTreeJobOutput}
 	touch $@

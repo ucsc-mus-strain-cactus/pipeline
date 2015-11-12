@@ -36,7 +36,7 @@ netAll = ${CHAINING_DIR}/${queryOrg}-${targetOrg}.all.net.gz
 chain:  ${chainAll}
 ${chainAll}: ${halFile} ${queryTwoBit} ${targetTwoBit}
 	@mkdir -p $(dir ${chainAll}) ${jobTreeChainTmpDir}
-	 ./bin/ucscChainNet ${jobTreeChainingOpts} ${halFile} ${queryOrg} ${queryTwoBit} ${targetOrg} \
+	ucscChainNet ${jobTreeChainingOpts} ${halFile} ${queryOrg} ${queryTwoBit} ${targetOrg} \
 	        ${targetTwoBit} ${chainAll} ${netAll} > ${jobTreeJobOutput} 2>&1
 
 chainClean:

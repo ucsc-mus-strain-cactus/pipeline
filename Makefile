@@ -1,6 +1,12 @@
 include defs.mk
 .PHONY: test
 
+init:
+	git submodule update --init --recursive
+	cd comparativeAnnotator/jobTree && make
+	cd comparativeAnnotator/sonLib && make
+	cd comparativeAnnotator/hal && make
+
 all: genomeFiles chaining transMap referenceComparativeAnnotator comparativeAnnotator metrics
 
 augustus: genomeFiles chaining transMap referenceComparativeAnnotator comparativeAnnotator \

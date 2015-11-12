@@ -16,7 +16,7 @@ all: ${metricsFlag}
 
 ${metricsFlag}:
 	@mkdir -p $(dir $@)
-	cd ../comparativeAnnotator && ${python} plotting/consensus_plots.py --compAnnPath ${comparativeAnnotationDir} \
+	${python} comparativeAnnotator/plotting/consensus_plots.py --compAnnPath ${comparativeAnnotationDir} \
 	--genomes ${augustusOrgs} --gencode ${gencodeGenes} --workDir ${consensusWorkDir} --outDir ${metricsDir}
 	touch $@
 

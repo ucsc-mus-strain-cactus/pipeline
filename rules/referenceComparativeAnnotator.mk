@@ -32,7 +32,7 @@ ${comparativeAnnotationDone}: ${srcGencodeGp} ${queryFasta} ${querySizes}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${comparativeAnnotationDir}
 	@mkdir -p ${jobTreeCompAnnTmpDir}
-	cd ../comparativeAnnotator && ${python} src/annotation_pipeline.py ${mode} ${jobTreeOpts} \
+	${python} comparativeAnnotator/src/annotation_pipeline.py ${mode} ${jobTreeOpts} \
 	--refGenome ${srcOrg} --annotationGp ${srcGencodeGp} --queryFasta ${queryFasta} --sizes ${querySizes} \
 	--gencodeAttributes ${srcGencodeAttrsTsv} --outDir ${comparativeAnnotationDir} \
 	--jobTree ${jobTreeCompAnnJobDir} &> ${jobTreeCompAnnJobOutput}
@@ -41,7 +41,7 @@ ${comparativeAnnotationDone}: ${srcGencodeGp} ${queryFasta} ${querySizes}
 ${clusteringDone}: ${comparativeAnnotationDone}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeClusteringTmpDir}
-	cd ../comparativeAnnotator && ${python} plotting/clustering.py ${jobTreeOpts} \
+	${python} comparativeAnnotator/plotting/clustering.py ${jobTreeOpts} \
 	--genome ${srcOrg} --refGenome ${srcOrg} --outDir ${metricsDir} \
 	--comparativeAnnotationDir ${comparativeAnnotationDir} --gencode ${gencodeSubset} \
 	--jobTree ${jobTreeClusteringJobDir} --mode reference &> ${jobTreeClusteringJobOutput}

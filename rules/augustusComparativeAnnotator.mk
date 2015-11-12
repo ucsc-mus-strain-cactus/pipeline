@@ -100,7 +100,7 @@ runOrg: ${intronVector} ${sortedGp} ${inputGp} ${outputGtf} ${outputGp} ${output
 
 ${intronVector}:
 	@mkdir -p $(dir $@)
-	cd ../comparativeAnnotator && ${python} augustus/find_intron_vector.py --genome ${mapTargetOrg} \
+	${python} comparativeAnnotator/augustus/find_intron_vector.py --genome ${mapTargetOrg} \
 	--refPsl ${refPsl} --psl ${psl} --gp ${targetGp} --outPath ${intronVector}.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
@@ -118,7 +118,7 @@ ${inputGp}: ${sortedGp} ${intronVector}
 ${outputGtf}: ${inputGp}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeAugustusTmpDir}
-	cd ../comparativeAnnotator && ${python} augustus/run_augustus.py ${jobTreeOpts} --hintsDb ${hintsDb} \
+	${python} comparativeAnnotator/augustus/run_augustus.py ${jobTreeOpts} --hintsDb ${hintsDb} \
 	--inputGp $< --outputGtf $@ --genome ${mapTargetOrg} --chromSizes ${targetSizes} \
 	--fasta ${targetFasta} --jobTree ${jobTreeAugustusJobDir} &> ${jobTreeAugustusJobOutput}
 
@@ -129,7 +129,7 @@ ${outputGp}: ${outputGtf}
 
 ${outputBed12_8}: ${outputGp}
 	@mkdir -p $(dir $@)
-	cd ../comparativeAnnotator && cat $< | augustus/gp2othergp.pl | bedSort /dev/stdin $@.${tmpExt}
+	cat $< | comparativeAnnotator/augustus/gp2othergp.pl | bedSort /dev/stdin $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
 ${outputBb}: ${outputBed12_8}
@@ -158,7 +158,7 @@ ${augustusFaidx}: ${augustusFa}
 ${augustusComparativeAnnotationDone}: ${outputGp}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeAugustusCompAnnTmpDir}
-	cd ../comparativeAnnotator && ${python} src/annotation_pipeline.py ${mode} ${jobTreeOpts} \
+	${python} comparativeAnnotator/src/annotation_pipeline.py ${mode} ${jobTreeOpts} \
 	--refGenome ${srcOrg} --genome ${mapTargetOrg} --annotationGp ${refGp} --psl ${psl} --targetGp ${targetGp} \
 	--fasta ${targetFasta} --refFasta ${refFasta} --sizes ${targetSizes} --outDir ${comparativeAnnotationDir} \
 	--gencodeAttributes ${srcGencodeAttrsTsv} --jobTree ${jobTreeAugustusCompAnnJobDir} \
@@ -168,7 +168,7 @@ ${augustusComparativeAnnotationDone}: ${outputGp}
 ${augustusAlignmentDone}: ${augustusFa} ${augustusFaidx}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeAlignAugustusTmpDir}
-	cd ../comparativeAnnotator && ${python} augustus/align_augustus.py ${jobTreeOpts} \
+	${python} comparativeAnnotator/augustus/align_augustus.py ${jobTreeOpts} \
 	--genome ${mapTargetOrg} --srcGencodeFa ${srcGencodeFa} --targetTranscriptFasta ${augustusFa} \
 	--targetTranscriptFastaIndex ${augustusFaidx} --outDir ${comparativeAnnotationDir} \
 	--jobTree ${jobTreeAlignAugustusJobDir} &> ${jobTreeAlignAugustusJobOutput}
@@ -176,7 +176,7 @@ ${augustusAlignmentDone}: ${augustusFa} ${augustusFaidx}
 
 ${consensusDone}: ${comparativeAnnotationDone} ${augustusComparativeAnnotationDone} ${augustusAlignmentDone} ${augGps}
 	@mkdir -p $(dir $@)
-	cd ../comparativeAnnotator && ${python} augustus/consensus.py --genome ${mapTargetOrg} \
+	${python} comparativeAnnotator/augustus/consensus.py --genome ${mapTargetOrg} \
 	--refGenome ${srcOrg} --compAnnPath ${comparativeAnnotationDir} --outDir ${consensusDir} \
 	--workDir ${consensusWorkDir} --augGp ${outputGp} --tmGp ${targetGp}
 	touch $@
@@ -184,7 +184,7 @@ ${consensusDone}: ${comparativeAnnotationDone} ${augustusComparativeAnnotationDo
 ${augustusClusterDone}: ${augustusComparativeAnnotationDone}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeClusterAugustusTmpDir}
-	cd ../comparativeAnnotator && ${python} plotting/clustering.py ${jobTreeOpts} --mode augustus \
+	${python} comparativeAnnotator/plotting/clustering.py ${jobTreeOpts} --mode augustus \
 	--genome ${mapTargetOrg} --refGenome ${srcOrg} --comparativeAnnotationDir ${comparativeAnnotationDir} \
 	--outDir ${metricsDir} --gencode ${gencodeGenes} --jobTree ${jobTreeClusterAugustusJobDir} \
 	&> ${jobTreeClusterAugustusJobOutput}

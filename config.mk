@@ -41,9 +41,6 @@ jobTreeOpts = --defaultMemory ${defaultMemory} --batchSystem ${batchSystem} --pa
 PYTHON_BIN_DIR = /hive/groups/recon/local/bin
 AUGUSTUS_BIN_DIR = /hive/users/ifiddes/augustus/trunks/bin
 
-# hard coded hal bin path in relative comparativeAnnotator location
-HAL_BIN_DIR = ../comparativeAnnotator/submodules/hal/bin
-
 # TODO: get Mark's pycbio library as a package in either comparativeAnnotator or pipeline repo
 PYCBIO_DIR = ${PROJ_DIR}/src/pycbio
 python = ${PYTHON_BIN_DIR}/python

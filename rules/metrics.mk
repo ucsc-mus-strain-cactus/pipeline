@@ -15,7 +15,7 @@ clean:
 
 ${metricsFlag}:
 	@mkdir -p $(dir $@)
-	cd ../comparativeAnnotator && ${python} plotting/transmap_analysis.py --outDir ${metricsDir} \
+	${python} comparativeAnnotator/plotting/transmap_analysis.py --outDir ${metricsDir} \
 	--genomes ${mappedOrgs} --refGenome ${srcOrg} --gencode ${gencodeGenes} \
 	--comparativeAnnotationDir ${comparativeAnnotationDir}
 	touch $@

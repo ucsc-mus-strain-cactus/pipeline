@@ -92,7 +92,7 @@ tmpExt = ${host}.${ppid}.tmp
 .SECONDARY:  # keep intermediates
 SHELL = /bin/bash -beEu
 export SHELLOPTS := pipefail
-export PATH := ${PYTHON_BIN_DIR}:${PYCBIO_DIR}/bin:./bin:${HAL_BIN_DIR}:${AUGUSTUS_BIN_DIR}:${PATH}
+export PATH := ./bin:${PYTHON_BIN_DIR}:${PYCBIO_DIR}/bin:comparativeAnnotator/hal/bin:${AUGUSTUS_BIN_DIR}:${PATH}
 export PYTHONPATH := ./:${PYTHONPATH}
 
 
