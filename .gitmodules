@@ -1,0 +1,3 @@
+[submodule "comparativeAnnotator"]
+	path = comparativeAnnotator
+	url = https://github.com/ucsc-mus-strain-cactus/comparativeAnnotator.git
