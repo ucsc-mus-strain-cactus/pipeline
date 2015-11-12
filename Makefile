@@ -1,16 +1,16 @@
 include defs.mk
 .PHONY: test
 
+all: genomeFiles gencode chaining transMap referenceComparativeAnnotator comparativeAnnotator metrics
+
+augustus: all augustusDb augustusComparativeAnnotator metrics augustusMetrics
+
 init:
 	git submodule update --init --recursive
 	cd comparativeAnnotator/jobTree && make
 	cd comparativeAnnotator/sonLib && make
 	cd comparativeAnnotator/hal && make
-
-all: genomeFiles chaining transMap referenceComparativeAnnotator comparativeAnnotator metrics
-
-augustus: genomeFiles chaining transMap referenceComparativeAnnotator comparativeAnnotator \
-	augustusComparativeAnnotator metrics augustusMetrics
+	cd pycbio && make
 
 genomeFiles:
 	${MAKE} -f rules/genomeFiles.mk
@@ -30,6 +30,9 @@ referenceComparativeAnnotator: transMap
 comparativeAnnotator: referenceComparativeAnnotator
 	${MAKE} -f rules/comparativeAnnotator.mk
 
+augustusDb:
+	${MAKE} -f rules/augustusHints.mk
+
 augustusComparativeAnnotator: comparativeAnnotator
 	${MAKE} -f rules/augustusComparativeAnnotator.mk
 
@@ -38,10 +41,6 @@ metrics: comparativeAnnotator
 
 augustusMetrics: augustusComparativeAnnotator
 	${MAKE} -f rules/augustusMetrics.mk
-
-test:
-	python scripts/parseSDP_test.py
-	python -m doctest -v scripts/*.py
 
 clean:
 	${MAKE} -f rules/genomeFiles.mk clean
@@ -55,3 +54,4 @@ clean:
 cleanAugustus:
 	${MAKE} -f rules/augustusComparativeAnnotator.mk clean
 	${MAKE} -f rules/augustusMetrics.mk clean
+	${MAKE} -f rules/augustusHints.mk clean

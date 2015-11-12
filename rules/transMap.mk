@@ -46,11 +46,11 @@ transMapClean:
 # map and update match stats, which likes target sort for speed
 ${transMapPsl}: ${srcGencodePsl} ${srcGencodeFa} ${mappingChains} ${targetTwoBit}
 	@mkdir -p $(dir $
-	pslMap -mapInfo=${transMapDataDir}/transMap$*.mapinfo -chainMapFile ${SRC_GENCODE_DATA_DIR}/wgEncode$*.psl ${mappingChains} /dev/stdout \
+	pslMap -chainMapFile ${srcGencodePsl} ${mappingChains} /dev/stdout \
 		| bin/postTransMapChain /dev/stdin /dev/stdout \
 		| sort -k 14,14 -k 16,16n \
-		| pslRecalcMatch /dev/stdin ${targetTwoBit} ${SRC_GENCODE_DATA_DIR}/wgEncode$*.fa stdout \
-		| bin/pslQueryUniq >$@.${tmpExt}
+		| pslRecalcMatch /dev/stdin ${targetTwoBit} ${srcGencodeFa} stdout \
+		| bin/pslQueryUniq > $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
 ###
@@ -58,7 +58,7 @@ ${transMapPsl}: ${srcGencodePsl} ${srcGencodeFa} ${mappingChains} ${targetTwoBit
 ###
 ${transMapGp}: ${transMapPsl} ${srcGencodeCds}
 	@mkdir -p $(dir $@)
-	mrnaToGene -keepInvalid -quiet -genePredExt -ignoreUniqSuffix -insertMergeSize=0 -cdsFile=${SRC_GENCODE_DATA_DIR}/wgEncode$*.cds $< $@.${tmpExt}
+	mrnaToGene -keepInvalid -quiet -genePredExt -ignoreUniqSuffix -insertMergeSize=0 -cdsFile=${srcGencodeCds} $< $@.${tmpExt}
 	mv -f $@.${tmpExt} $@
 
 endif

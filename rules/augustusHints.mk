@@ -1,12 +1,13 @@
 #####
-# Build an Augustus hints database. Expects a base folder to find bamfiles in.
-# which you pass as FOLDER=
-# TODO: make this work pan-genome. right now it is required you also pass mapTargetOrg=
+# Build an Augustus hints database.
+# Pass filterTissues=X and/or filterCenters=Y to filter out any BAMfiles whose path contains those strings
+# I.E. filterTissues=lung heart filterCenters=unc. This assumes you have a similar directory structure to what I use
+# genome/center/tissue/bamfiles
 #####
 include defs.mk
 
 
-all: ${augustusOrgs:%=%.runOrg}
+all: ${augustusOrgs:%=%.runOrg} finishDb
 
 clean: ${augustusOrgs:%=%.runOrgClean}
 
@@ -27,8 +28,6 @@ ifneq (${filterCenters},)
 fc = --filterCenters ${filterCenters}
 endif
 
- # TODO: make this the actual hints file in defs.mk
-db = ${AUGUSTUS_DIR}/hints_ian_build.db 
 fofn = ${AUGUSTUS_DIR}/rnaseq_fofn/${mapTargetOrg}
 
 fasta = ${ASM_GENOMES_DIR}/${mapTargetOrg}.fa
@@ -40,7 +39,7 @@ doneFlagDir = ${DONE_FLAG_DIR}/${mapTargetOrg}
 jobTreeTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/augustus_db/${mapTargetOrg}
 jobTreeJobOutput = ${jobTreeTmpDir}/augustus_hints_db.out
 jobTreeJobDir = ${jobTreeTmpDir}/jobTree
-done = ${doneFlagDir}/hints_db.done
+done = ${doneFlagDir}/hintsDb.done
 
 runOrg: ${fofn} ${done}
 
@@ -52,11 +51,20 @@ ${done}:
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeTmpDir}
 	${python} comparativeAnnotator/augustus/build_hints_db.py ${jobTreeOpts} \
-	--genome ${mapTargetOrg} --bamFofn ${fofn} --fasta ${fasta} --database ${db} ${fc} ${ft} \
-	--jobTree ${jobTreeJobDir} --batchSystem singleMachine --maxThreads 20 &> ${jobTreeJobOutput}
+	--genome ${mapTargetOrg} --bamFofn ${fofn} --fasta ${fasta} --database ${hintsDb} ${fc} ${ft} \
+	--jobTree ${jobTreeJobDir} &> ${jobTreeJobOutput}
 	touch $@
 
 runOrgClean:
 	rm -rf ${fofn} ${done} ${jobTreeJobDir}
+
+else
+
+dbDone = ${DONE_FLAG_DIR}/indexedHints.done
+
+finishDb: ${dbDone}
+
+${dbDone}:
+	load2sqlitedb --makeIdx --dbaccess ${hintsDb}
 
 endif

@@ -1,4 +1,4 @@
-include ../pipeline/config.mk
+include config.mk
 
 # base directory definitions
 DATA_DIR = ${PROJ_DIR}/pipeline_data
@@ -89,11 +89,11 @@ ppid=$(shell echo $$PPID)
 tmpExt = ${host}.${ppid}.tmp
 
 
-.SECONDARY:  # keep intermediates
+.SECONDARY:
 SHELL = /bin/bash -beEu
 export SHELLOPTS := pipefail
-export PATH := ./bin:${PYTHON_BIN_DIR}:${PYCBIO_DIR}/bin:comparativeAnnotator/hal/bin:${AUGUSTUS_BIN_DIR}:${PATH}
-export PYTHONPATH := ./:${PYTHONPATH}
+export PATH := ./bin:${PYTHON_BIN_DIR}:./pycbio/bin:/bin:./comparativeAnnotator/hal/bin:${AUGUSTUS_BIN_DIR}:${PATH}
+export PYTHONPATH := ./:./lib:./pycbio:./comparativeAnnotator:${PYTHONPATH}
 
 
 ifeq (${TMPDIR},)
