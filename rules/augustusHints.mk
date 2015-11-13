@@ -28,6 +28,8 @@ ifneq (${filterCenters},)
 fc = --filterCenters ${filterCenters}
 endif
 
+hintsDir = ${AUGUSTUS_WORK_DIR}/hints
+
 fofn = ${AUGUSTUS_DIR}/rnaseq_fofn/${mapTargetOrg}
 
 fasta = ${ASM_GENOMES_DIR}/${mapTargetOrg}.fa
@@ -50,9 +52,10 @@ ${fofn}:
 ${done}:
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreeTmpDir}
+	@mkdir -p ${hintsDir}
 	${python} comparativeAnnotator/augustus/build_hints_db.py ${jobTreeOpts} \
 	--genome ${mapTargetOrg} --bamFofn ${fofn} --fasta ${fasta} --database ${hintsDb} ${fc} ${ft} \
-	--jobTree ${jobTreeJobDir} &> ${jobTreeJobOutput}
+	--jobTree ${jobTreeJobDir} --hintsDir ${hintsDir} &> ${jobTreeJobOutput}
 	touch $@
 
 runOrgClean:
