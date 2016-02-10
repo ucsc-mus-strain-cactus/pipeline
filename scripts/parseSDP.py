@@ -2,6 +2,8 @@
 """Parses the SVs contained in a .sdp.tab file. If run as a script,
 then outputs a bed file containing the SVs."""
 import sys
+import gzip
+from collections import defaultdict
 
 class SV:
     """Represents a SDP structural variant."""
@@ -123,10 +125,20 @@ def parse_SDP(sdpFile):
         row = dict(zip(headers, fields))
         yield SV(row)
 
+
+def main():
+    sv_map = defaultdict(list)
+    with gzip.open(sys.argv[1]) as f:
+        for sv in parse_SDP(f):
+            for sample in sv.samples_affected():
+                chrom, start, stop = sv.breakpoints(sample)
+                sv_class = sv.svClass(sample)
+                sv_map[sample].append([chrom, start, stop, sv_class])
+    for sample, recs in sv_map.iteritems():
+        recs = sorted(recs, key=lambda (chrom, start, stop, sv_class): (chrom, start))
+        with open(sample + ".svs.bed", "w") as outf:
+            for r in recs:
+                outf.write("\t".join(map(str, r)) + "\n")
+
 if __name__ == '__main__':
-    # output a bed file
-    for sv in parse_SDP(open(sys.argv[1])):
-        for sample in sv.samples_affected():
-            breakpoints = sv.breakpoints(sample)
-            print "%s\t%d\t%d\t%s" % (breakpoints[0], breakpoints[1],
-                                      breakpoints[2], sample + '\\' + sv.svClass(sample))
+    main()
