@@ -69,7 +69,7 @@ def convertMutationBedToRealBed(mutationsFilePath, destBedPath, reversePolarity=
 
 def liftMutations(halTreeMutationsDir, hal, sourceGenome, targetGenome, targetBed, reversePolarity=False):
     """Lift a mutation BED onto the reference.
-    
+
     If reversePolarity is true, the labeling of insertions/deletions will be swapped."""
     sourceMutations = os.path.join(halTreeMutationsDir, sourceGenome + ".bed")
     sourceBed = os.path.join(halTreeMutationsDir, sourceGenome + ".realBed.bed")
@@ -115,10 +115,10 @@ def main():
         bedForTarget = os.path.join(opts.outputDir, target + '.bed')
         # First, walk up the tree to the MRCA.
         for curGenome in pathUp:
-            liftMutations(opts.halTreeMutationsDir, opts.hal, curGenome, opts.refGenome, bedForTarget)
+            liftMutations(opts.halTreeMutationsDir, opts.hal, curGenome, opts.refGenome, bedForTarget, reversePolarity=True)
         # Next, walk down the tree to the target.
         for curGenome in pathDown:
-            liftMutations(opts.halTreeMutationsDir, opts.hal, curGenome, opts.refGenome, bedForTarget, reversePolarity=True)
+            liftMutations(opts.halTreeMutationsDir, opts.hal, curGenome, opts.refGenome, bedForTarget)
 
 if __name__ == '__main__':
     main()
