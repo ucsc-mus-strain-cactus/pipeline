@@ -64,6 +64,10 @@ def convertMutationBedToRealBed(mutationsFilePath, destBedPath, reversePolarity=
                     mutationID = 'I'
                 elif mutationID == 'GD':
                     mutationID = 'GI'
+                elif mutationID == 'DB':
+                    mutationID = 'I'
+                elif mutationID == 'GDB':
+                    mutationID = 'GI'
             combinedName = "%s|%s|%s" % (mutationID, parentGenome, childGenome)
             destBed.write("%s\t%s\t%s\t%s\n" % (chr, start, stop, combinedName))
 
