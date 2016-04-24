@@ -10,11 +10,10 @@ from sonLib.bioio import system
 # There are 3 phases to the process: splitting the input, running
 # repeatmasker, and concatenation of the repeat-masked pieces.
 
-def concatenate_job(job, input_ids, lift_id):
-    lift_path = job.fileStore.readGlobalFile(lift_id)
+def concatenate_job(job, input_ids):
     output = os.path.join(job.fileStore.getLocalTempDir(), 'rm.out')
     input_paths = map(job.fileStore.readGlobalFile, input_ids)
-    system("liftUp {output} {lift_file} error {inputs}".format(output=output, lift_file=lift_path, inputs=" ".join(input_paths)))
+    system("cat {inputs} > {output}".format(output=output, inputs=" ".join(input_paths)))
     return job.fileStore.writeGlobalFile(output)
 
 def repeat_masking_job(job, input_fasta, species):
@@ -27,22 +26,20 @@ def repeat_masking_job(job, input_fasta, species):
 
 def split_fasta(input_fasta, split_size, work_dir):
     lift_file = os.path.join(work_dir, "lift")
-    system("faSplit -lift={lift_file} size {input} {split_size} {out_root}".format(
+    system("faSplit about {input} {split_size} {out_root}".format(
         input=input_fasta,
         split_size=split_size,
-        out_root=os.path.join(work_dir, "out"),
-        lift_file=lift_file))
-    return (lift_file, glob(os.path.join(work_dir, "out*")))
+        out_root=os.path.join(work_dir, "out")))
+    return glob(os.path.join(work_dir, "out*"))
 
 def split_fasta_job(job, input_fasta, opts):
     work_dir = job.fileStore.getLocalTempDir()
     local_fasta = os.path.join(work_dir, 'in.fa')
     job.fileStore.readGlobalFile(input_fasta, local_fasta)
-    lift_file, split_fastas = split_fasta(local_fasta, opts.split_size, work_dir)
-    lift_id = job.fileStore.writeGlobalFile(lift_file)
+    split_fastas = split_fasta(local_fasta, opts.split_size, work_dir)
     split_fasta_ids = [job.fileStore.writeGlobalFile(f) for f in split_fastas]
     repeat_masked = [job.addChildJobFn(repeat_masking_job, id, opts.species).rv() for id in split_fasta_ids]
-    return job.addFollowOnJobFn(concatenate_job, repeat_masked, lift_id).rv()
+    return job.addFollowOnJobFn(concatenate_job, repeat_masked).rv()
 
 def parse_args():
     parser = ArgumentParser(description=__doc__)
