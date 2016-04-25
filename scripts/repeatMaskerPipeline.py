@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 from glob import glob
 from toil.job import Job
 from toil.common import Toil
-from sonLib.bioio import system
+from sonLib.bioio import system, popenCatch
 
 # There are 3 phases to the process: splitting the input, running
 # repeatmasker, and concatenation of the repeat-masked pieces.
@@ -13,7 +13,8 @@ from sonLib.bioio import system
 def concatenate_job(job, input_ids):
     output = os.path.join(job.fileStore.getLocalTempDir(), 'rm.out')
     input_paths = map(job.fileStore.readGlobalFile, input_ids)
-    system("cat {inputs} > {output}".format(output=output, inputs=" ".join(input_paths)))
+    popenCatch("xargs -0 -n 50 cat >> {output}".format(output=output),
+               "\0".join(input_paths))
     return job.fileStore.writeGlobalFile(output)
 
 def repeat_masking_job(job, input_fasta, species):
@@ -53,9 +54,12 @@ def parse_args():
 def main():
     opts = parse_args()
     with Toil(opts) as toil:
-        input_fasta_id = toil.importFile('file://' + os.path.abspath(opts.input_fasta))
-        job = Job.wrapJobFn(split_fasta_job, input_fasta_id, opts)
-        result_id = toil.run(job)
+        if opts.restart:
+            result_id = toil.run()
+        else:
+            input_fasta_id = toil.importFile('file://' + os.path.abspath(opts.input_fasta))
+            job = Job.wrapJobFn(split_fasta_job, input_fasta_id, opts)
+            result_id = toil.run(job)
         toil.exportFile(result_id, 'file://' + os.path.abspath(opts.output))
 
 if __name__ == '__main__':
