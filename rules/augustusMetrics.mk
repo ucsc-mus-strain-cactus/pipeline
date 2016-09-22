@@ -5,12 +5,12 @@ include defs.mk
 
 # Paths
 comparativeAnnotationDir = ${ANNOTATION_DIR}/${augustusGencodeSet}
-consensusDir = ${comparativeAnnotationDir}/consensus
-metricsDir = ${consensusDir}/metrics
-consensusWorkDir = ${AUGUSTUS_WORK_DIR}/consensus
+consensusDir = ${comparativeAnnotationDir}/consensus_v2
+metricsDir = ${consensusDir}/metrics_v2
+consensusWorkDir = ${AUGUSTUS_WORK_DIR}/consensus_v2
 
 # done flag dir
-metricsFlag = ${DONE_FLAG_DIR}/${augustusGencodeSet}_augustus_metrics.done
+metricsFlag = ${DONE_FLAG_DIR}/${augustusGencodeSet}_augustus_metrics_v2.done
 
 all: ${metricsFlag}
 

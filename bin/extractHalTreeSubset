@@ -8,6 +8,7 @@ import subprocess
 import argparse
 from ete3 import Tree
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("hal")
@@ -17,7 +18,7 @@ def main():
     tree = Tree(tree_str, format=1)
     genomes = args.genomes.split(",")
     tree.prune(genomes, preserve_branch_length=True)
-    print tree.write()
+    print tree.write(format=1)
 
 
 if __name__ == "__main__":

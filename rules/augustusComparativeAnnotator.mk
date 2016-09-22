@@ -91,14 +91,16 @@ augustusFaDir = ${AUGUSTUS_WORK_DIR}/fastas
 augustusFa = ${augustusFaDir}/${mapTargetOrg}.fa
 augustusFaidx = ${augustusFaDir}/${mapTargetOrg}.fa.fai
 
-consensusDir = ${comparativeAnnotationDir}/consensus
-consensusWorkDir = ${AUGUSTUS_WORK_DIR}/consensus
-consensusDone = ${doneFlagDir}/consensus.done
+consensusDir = ${comparativeAnnotationDir}/consensus_v2
+consensusWorkDir = ${AUGUSTUS_WORK_DIR}/consensus_v2
+consensusDone = ${doneFlagDir}/consensus_tmp.done
 
 
-runOrg: ${intronVector} ${sortedGp} ${inputGp} ${outputGtf} ${outputGp} ${outputBed12_8} ${outputBb} ${outputBbSym} \
-	${outputBed} ${augustusFa} ${augustusFaidx} ${augustusComparativeAnnotationDone} \
-	${augustusAlignmentDone} ${consensusDone} ${augustusClusterDone}
+#runOrg: ${intronVector} ${sortedGp} ${inputGp} ${outputGtf} ${outputGp} ${outputBed12_8} ${outputBb} ${outputBbSym} \
+#	${outputBed} ${augustusFa} ${augustusFaidx} ${augustusComparativeAnnotationDone} \
+#	${augustusAlignmentDone} ${consensusDone} ${augustusClusterDone}
+
+runOrg: ${consensusDone}
 
 ${intronVector}:
 	@mkdir -p $(dir $@)
@@ -176,7 +178,7 @@ ${augustusComparativeAnnotationDone}: ${outputGp} ${augustusAlignmentDone}
 	--augustusGp $< --refPsl ${refPsl} &> ${jobTreeAugustusCompAnnJobOutput}
 	touch $@
 
-${consensusDone}: ${comparativeAnnotationDone} ${augustusComparativeAnnotationDone} ${augustusAlignmentDone}
+${consensusDone}: #|${comparativeAnnotationDone} ${augustusComparativeAnnotationDone} ${augustusAlignmentDone}
 	@mkdir -p $(dir $@)
 	cd ../comparativeAnnotator && ${python} src/generate_gene_set.py --genome ${mapTargetOrg} \
 	--refGenome ${srcOrg} --compAnnPath ${comparativeAnnotationDir} --outDir ${consensusDir} \

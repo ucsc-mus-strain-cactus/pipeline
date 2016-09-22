@@ -16,11 +16,11 @@ make_commas = $(subst $(eval) ,${comma},$1)
 # if targetGenomes is defined on the command line, format it for dless
 ifneq (${targetGenomes},)
 targetGenomeStr = --targetGenomes ${targetGenomes}
-outputDirBase = $(call make_dots,${targetGenomes})
+outputDirBase = $(call make_dots,${targetGenomes})_WITH_ANCESTORS
 tree = --tree "$(shell bin/extractHalTreeSubset ${halFile} ${targetGenomes})"
 else
 targetGenomeCommas = $(call make_commas,${mappedOrgs})
-outputDirBase = $(call make_dots,${targetGenomeCommas})
+outputDirBase = $(call make_dots,${targetGenomeCommas})_WITH_ANCESTORS
 targetGenomeStr = 
 tree = 
 endif
@@ -47,7 +47,7 @@ jobTreePhastConsTmpDir = $(shell pwd -P)/${jobTreeRootTmpDir}/phastCons/${output
 jobTreePhastConsJobOutput = ${jobTreePhastConsTmpDir}/phastCons.out
 jobTreePhastConsJobDir = ${jobTreePhastConsTmpDir}/jobTree
 
-all: phyloP dless phastCons
+all: dless phastCons #phyloP
 
 phyloP: ${modFile}
 	@mkdir -p ${wigDir}
@@ -69,7 +69,8 @@ ${phastConsBed}: ${modFile}
 	@mkdir -p $(dir $@)
 	@mkdir -p ${jobTreePhastConsTmpDir}
 	cd ../comparativeAnnotator && ${python} phast/phastcons.py ${halFile} ${srcOrg} $< $@ ${phastConsWig} --ref-fasta-path ${refFasta} \
-	${jobTreeOpts} --jobTree ${jobTreePhastConsJobDir} &> ${jobTreePhastConsJobOutput}
+	${jobTreeOpts} --jobTree ${jobTreePhastConsJobDir} --output-nonconserved-model ${phastConsOutDir}/ave.noncons.mod \
+	--output-conserved-model ${phastConsOutDir}/ave.cons.mod &> ${jobTreePhastConsJobOutput}
 
 
 # --conserved option will ensure that the 4d sites are actually 4d
@@ -84,6 +85,6 @@ ${4dSitesBed}: ${cleanedCdsBed}
 # output file extension for some reason
 ${modFile}: ${4dSitesBed}
 	@mkdir -p $(dir $@)
-	cd ../comparativeAnnotator && ${python} hal/phyloP/halPhyloPTrain.py --numProc 6 --noAncestors \
+	cd ../comparativeAnnotator && ${python} hal/phyloP/halPhyloPTrain.py --numProc 6 \
 	--no4d ${halFile} ${srcOrg} ${4dSitesBed} $@.${tmpExt}.mod --error ${errorFile} ${targetGenomeStr} ${tree}
 	mv -f $@.${tmpExt}.mod $@
